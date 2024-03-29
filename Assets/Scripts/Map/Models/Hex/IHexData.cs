@@ -4,6 +4,7 @@ using Map.Models.Terrain;
 using Resources;
 using Units;
 using Units.Models.Unit;
+using UnityEngine;
 
 namespace Map.Models.Hex
 {
@@ -12,6 +13,8 @@ namespace Map.Models.Hex
         int X { get; } // Позиция X на карте
         int Y { get; } // Позиция Y на карте
         int Z { get; } // Позиция Z на карте, где Z = -X - Y для кубических координат
+        
+        public Vector2 Cords { get; }
 
         TerrainType Terrain { get; set; } // Тип местности гекса
         ICityData City { get; set; } // Город, если он есть на этом гексе

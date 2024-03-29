@@ -48,9 +48,10 @@
     <Compile Include="Assets\Scripts\Cities\Models\Effects\IEffect.cs" />
     <Compile Include="Assets\Scripts\Units\UnitManager.cs" />
     <Compile Include="Assets\Scripts\Map\Models\Hex\IHexData.cs" />
+    <Compile Include="Assets\Scripts\UI\Map\Hex\HexManager.cs" />
     <Compile Include="Assets\Scripts\Resources\Models\Resource\ResourceType.cs" />
-    <Compile Include="Assets\Scripts\UI\Map\Hex\HexCell.cs" />
     <Compile Include="Assets\Scripts\Cities\Models\Buildings\IBuilding.cs" />
+    <Compile Include="Assets\Scripts\Units\Models\Unit\UnitType.cs" />
     <Compile Include="Assets\Scripts\Resources\ResourceManager.cs" />
     <Compile Include="Assets\Scripts\Players\Models\Player\IPlayerData.cs" />
     <Compile Include="Assets\Scripts\Units\Models\Unit\IUnitData.cs" />
@@ -60,11 +61,14 @@
     <Compile Include="Assets\Scripts\Common\Static\UISettings\HexMetrics.cs" />
     <Compile Include="Assets\Scripts\Map\Models\Terrain\TerrainType.cs" />
     <Compile Include="Assets\Scripts\Cities\CityManager.cs" />
+    <Compile Include="Assets\Scripts\Players\Models\Player\Player.cs" />
     <Compile Include="Assets\NotSorted\Assets\Fantasy Character Pixel Art Pack\Script\CharacterAnimation.cs" />
     <Compile Include="Assets\Scripts\Resources\Models\Resource\IResourceData.cs" />
-    <Compile Include="Assets\Scripts\UI\Map\HexGrid.cs" />
+    <Compile Include="Assets\Scripts\Units\Models\Unit\Baza.cs" />
+    <Compile Include="Assets\Scripts\Map\Models\Hex\HexData.cs" />
     <Compile Include="Assets\Scripts\Map\MapManager.cs" />
     <Compile Include="Assets\Scripts\Cities\Models\City\ICityData.cs" />
+    <Compile Include="Assets\Scripts\UI\Map\Grid\GridManager.cs" />
     <Reference Include="UnityEngine">
       <HintPath>D:\soft\unity\2022.3.22f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
