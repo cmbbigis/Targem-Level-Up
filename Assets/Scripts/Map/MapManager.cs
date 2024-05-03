@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Core;
 using Map.Models.Hex;
 using Map.Models.Map;
 using Map.Models.Terrain;
@@ -91,15 +92,28 @@ namespace Map
         {
             MakeSimpleRandomMap();
         }
+
+        public void MoveCamera(Vector3 diff) =>
+            _gridManager.MoveCamera(diff);
+        
+        public void ZoomCamera(float diff) =>
+            _gridManager.ZoomOn(diff);
         
         public void FocusOnUnit(IUnitData unit)
         {
             _gridManager.CenterCamOnUnit(unit);
-            _gridManager.Zoom(3);
         }
         
         public void FocusOnHex(IHexData hex) =>
             _gridManager.CenterCamOnHex(hex);
+
+        public void FocusOnEntity(IEntity entity)
+        {
+            if (entity is IUnitData unit)
+                FocusOnUnit(unit);
+            else if (entity is IHexData hex)
+                FocusOnHex(hex);
+        }
 
         private void MakeSimpleRandomMap()
         {
@@ -139,7 +153,7 @@ namespace Map
             var hex = GetHexagonAt(cords);
             if (!unitData.CanStayOn(hex))
                 return false;
-            unitData.PlaceAt(hex);
+            PlaceUnitAt(unitData, hex);
             _gridManager.InitUnitAtCords(cords, unitData);
             return true;
         }
@@ -178,11 +192,11 @@ namespace Map
             throw new NotImplementedException();
         }
 
-        private Dictionary<IHexData, UnitPath> FindPaths(IUnitData unit, float maxDistance)
+        private Dictionary<IHexData, UnitPath> FindUnitPaths(IUnitData unit, float maxDistance)
         {
             var distances = new Dictionary<IHexData, float>();
             var previous = new Dictionary<IHexData, UnitPath>();
-            var priorityQueue = new SortedList<float, UnitPath>();
+            var pathQueue = new List<UnitPath>();
             var visited = new HashSet<IHexData>();
 
             foreach (var hex in _hexes.Values)
@@ -191,18 +205,23 @@ namespace Map
             var startHex = unit.Hex;
             distances[startHex] = 0;
             var initialPath = new UnitPath(new List<IHexData> { startHex }, 0);
-            priorityQueue.Add(0, initialPath);
+            pathQueue.Add(initialPath);
 
-            while (priorityQueue.Count > 0)
+            // Modified Dijkstra's algorithm using manual sorting of the priority queue
+            while (pathQueue.Count > 0)
             {
-                var currentPath = priorityQueue.Values[0];
-                priorityQueue.RemoveAt(0);
-                var currentHex = currentPath.Hexes.Last();
+                // Sort the queue by path total distance in ascending order
+                pathQueue.Sort((p1, p2) => p1.TotalDistance.CompareTo(p2.TotalDistance));
+                var currentPath = pathQueue[0];
+                pathQueue.RemoveAt(0);
 
-                if (!visited.Add(currentHex))
+                var currentHex = currentPath.Hexes.Last();
+                if (visited.Contains(currentHex))
                     continue;
 
-                foreach (var neighbor in GetNeighbours(currentHex))
+                visited.Add(currentHex);
+
+                foreach (var neighbor in GetNeighbours(currentHex).Where(unit.CanStayOn))
                 {
                     var stepDistance = GetHexWeight(neighbor);
                     var distance = currentPath.TotalDistance + stepDistance;
@@ -212,19 +231,26 @@ namespace Map
                         distances[neighbor] = distance;
                         var newPath = currentPath.AddStep(neighbor, stepDistance);
                         previous[neighbor] = newPath;
-                        priorityQueue.Add(distance, newPath);
+                        pathQueue.Add(newPath);
                     }
                 }
             }
 
+            // Collect all paths
             var paths = new Dictionary<IHexData, UnitPath>();
-            foreach (var hex in previous.Keys.Where(hex => distances[hex] <= maxDistance && hex.Unit == null))
+            foreach (var hex in previous.Keys)
             {
-                paths[hex] = previous[hex];
+                if (distances[hex] <= maxDistance && hex.Unit == null)  // Optionally check for non-occupied hexes
+                {
+                    paths[hex] = previous[hex];
+                }
             }
 
             return paths;
         }
+
+        public IEnumerable<IHexData> FindPossibleHexes(IUnitData unit) =>
+            FindUnitPaths(unit, unit.MovementInfo.MovesLeft).Keys;
         
         private List<ResourcePath> FindResourcePaths(IHexData source, IHexData destination, int maxPaths)
         {
@@ -265,14 +291,29 @@ namespace Map
             return paths;
         }
         
-        private bool CanMoveUnitTo(IUnitData unit, IHexData hex)
+        public bool PlaceUnitAt(IUnitData unit, IHexData hex)
         {
-            throw new NotImplementedException();
+            if (!unit.CanStayOn(hex))
+                return false;
+            hex.Unit = unit;
+            unit.Hex = hex;
+            return true;
+        }
+        
+        private (bool, UnitPath) CanMoveUnitTo(IUnitData unit, IHexData hex)
+        {
+            var possiblePaths = FindUnitPaths(unit, unit.MovementInfo.MovesLeft);
+            if (!unit.CanStayOn(hex) || !possiblePaths.Keys.Contains(hex))
+                return (false, null);
+            return (true, possiblePaths[hex]);
         }
         
         public bool MoveUnitTo(IUnitData unit, IHexData hex)
         {
-            throw new NotImplementedException();
+            var (canMoveTo, path) = CanMoveUnitTo(unit, hex);
+            if (!canMoveTo)
+                return false;
+            return unit.MoveTo(hex, path.TotalDistance);
         }
 
         public int Width => width;

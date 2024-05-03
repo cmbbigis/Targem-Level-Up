@@ -8,9 +8,9 @@ using UnityEngine;
 
 namespace Units.Models.Unit
 {
-    public class Baza : IUnitData
+    public class UnitData : IUnitData
     {
-        public Baza(IPlayerData master, UnitType unitType, int healthPoints, int attackPower, int movementRange, HashSet<TerrainType> allowedTerrainTypes)
+        public UnitData(IPlayerData master, UnitType unitType, int healthPoints, int attackPower, int movementRange, HashSet<TerrainType> allowedTerrainTypes)
         {
             Master = master;
             UnitType = unitType;
@@ -40,26 +40,12 @@ namespace Units.Models.Unit
         {
             return destination.Unit == null && AllowedTerrainTypes.Contains(destination.Terrain);
         }
-        
-        public bool CanMoveTo(IHexData destination)
-        {
-            return CanStayOn(destination) && Hex.DistanceTo(destination) <= MovementInfo.MovesLeft;
-        }
-        
-        public bool PlaceAt(IHexData destination)
-        {
-            if (!CanStayOn(destination))
-                return false;
-            destination.Unit = this;
-            Hex = destination;
-            return true;
-        }
 
-        public bool MoveTo(IHexData destination)
+        public bool MoveTo(IHexData destination, float distance)
         {
-            if (!CanMoveTo(destination) || !CanMove())
+            if (!CanMove())
                 return false;
-            MovementInfo.MovesLeft -= Hex.DistanceTo(destination);
+            MovementInfo.MovesLeft -= distance;
             Hex.Unit = null;
             destination.Unit = this;
             Hex = destination;
@@ -88,6 +74,9 @@ namespace Units.Models.Unit
         public bool CanMove() => MovementInfo.MovesLeft > 0;
 
         public MovementInfo MovementInfo { get; private set; }
+        
+        public bool IsChosen { get; set; }
+        public bool IsHighlighted { get; set; }
 
         public void StartTurn()
         {

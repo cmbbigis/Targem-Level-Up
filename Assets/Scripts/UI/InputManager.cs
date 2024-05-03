@@ -64,5 +64,40 @@ namespace UI
         {
             _gameManager.HandleHexClicked(hex);
         }
+        
+        void Update()
+        {
+            HandleKeyboardInput();
+            HandleMouseScroll();
+        }
+
+        void HandleKeyboardInput()
+        {
+            if (Input.GetKey(KeyCode.UpArrow))
+            {
+                _gameManager.MoveCamera(Vector3.up);
+            }
+            if (Input.GetKey(KeyCode.DownArrow))
+            {
+                _gameManager.MoveCamera(Vector3.down);
+            }
+            if (Input.GetKey(KeyCode.LeftArrow))
+            {
+                _gameManager.MoveCamera(Vector3.left);
+            }
+            if (Input.GetKey(KeyCode.RightArrow))
+            {
+                _gameManager.MoveCamera(Vector3.right);
+            }
+        }
+
+        void HandleMouseScroll()
+        {
+            var scroll = Input.GetAxis("Mouse ScrollWheel");
+            if (scroll != 0)
+            {
+                _gameManager.ZoomCamera(scroll);
+            }
+        }
     }
 }

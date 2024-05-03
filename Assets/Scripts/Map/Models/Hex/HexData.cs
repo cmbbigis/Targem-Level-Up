@@ -28,5 +28,7 @@ namespace Map.Models.Hex
         {
             throw new System.NotImplementedException();
         }
+        public bool IsChosen { get; set; }
+        public bool IsHighlighted { get; set; }
     }
 }

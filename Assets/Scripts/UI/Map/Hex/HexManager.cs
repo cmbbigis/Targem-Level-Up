@@ -18,6 +18,7 @@ namespace UI.Map.Hex
 
         [SerializeField] public Sprite[] upperByTerrainType;
         [SerializeField] public Sprite[] lowerByTerrainType;
+        private static readonly int OutlineEnabled = Shader.PropertyToID("_OutlineEnabled");
 
         void Awake() {
             OnHexManagerCreated?.Invoke(this);
@@ -47,12 +48,12 @@ namespace UI.Map.Hex
             onHexClicked.Invoke(_data);
         }
         
-        private void OnMouseEnter()
+        private void Update()
         {
-        }
-
-        private void OnMouseExit()
-        {
+            if (Math.Abs((_data.IsChosen || _data.IsHighlighted ? 1 : 0) - _upperSprite.material.GetFloat(OutlineEnabled)) > 0.00001)
+            {
+                _upperSprite.material.SetFloat(OutlineEnabled, _data.IsChosen || _data.IsHighlighted ? 1 : 0);
+            }
         }
     }
 }

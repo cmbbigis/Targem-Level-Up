@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Map.Models.Hex;
 using Map.Models.Terrain;
@@ -21,6 +22,46 @@ namespace UI.Map.Grid
 
         private readonly Dictionary<Vector2, GameObject> _hexes = new();
         private readonly Dictionary<IUnitData, GameObject> _units = new();
+
+        private Vector3? _camTarget;
+        private Vector3? _camDiff;
+        private float? _zoomTarget;
+        private float? _zoomDiff = 0.1f;
+
+        private void Update()
+        {
+            if (_camTarget != null && _camDiff != null && _camTarget != cam.transform.position)
+            {
+                var (target, diff) = (_camTarget.Value, _camDiff.Value);
+                if ((target - cam.transform.position).magnitude > diff.magnitude)
+                    cam.transform.position += diff;
+                else
+                    cam.transform.position = target;
+            }
+
+            if (_zoomTarget != null && _zoomDiff != null && Math.Abs(_zoomTarget.Value - cam.orthographicSize) > 0.00001)
+            {
+                var (target, diff) = (_zoomTarget.Value, _zoomDiff.Value);
+                if (Math.Abs(target - cam.orthographicSize) > Math.Abs(diff))
+                    cam.orthographicSize = target;
+                else
+                    cam.orthographicSize += diff;
+            }
+        }
+
+        private void SetCamTarget(Vector3 cords)
+        {
+            var diff = cords - cam.transform.position;
+            _camTarget = cords;
+            _camDiff = diff / 20;
+        }
+
+        private void SetZoomTarget(float zoom)
+        {
+            var diff = zoom - cam.orthographicSize;
+            _zoomTarget = zoom;
+            _zoomDiff = diff / 20;
+        }
 
         public void Init(int width, int height)
         {
@@ -85,12 +126,12 @@ namespace UI.Map.Grid
                 Quaternion.identity);
             spawnedUnit.name = $"Unit {data.UnitType} of {data.Master.Name}";
             spawnedUnit.transform.SetParent(unitsObject.transform);
-            spawnedUnit.GetComponent<UnitManager>().Init(data);
+            spawnedUnit.GetComponent<UnitManager>().Init(data, spawnedUnit);
             _units[data] = spawnedUnit;
         }
         
         private void CenterCamAtReal(Vector3 cords) =>
-            cam.transform.position = cords + new Vector3(0, 0, -10);
+            SetCamTarget(cords + new Vector3(0, 0, -10));
 
         public void CenterCamAtHex(Vector2 cords) =>
             CenterCamAtReal(TransformCords(cords));
@@ -105,7 +146,20 @@ namespace UI.Map.Grid
             CenterCamOnObject(_hexes[data.Cords]);
 
         public void Zoom(float hexes) =>
-            cam.orthographicSize = hexes * 0.5f;
+            SetZoomTarget(hexes * 0.5f);
+
+        public void ZoomOn(float zoom)
+        {
+            _zoomTarget = null;
+            cam.orthographicSize -= zoom;
+        }
+
+        public void MoveCamera(Vector3 diff)
+        {
+            _camTarget = null;
+            _camDiff = null;
+            cam.transform.position += diff / 20;
+        }
 
         public void CenterCam()
         {

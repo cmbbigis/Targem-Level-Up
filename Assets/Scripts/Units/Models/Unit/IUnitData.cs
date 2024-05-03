@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using Core;
 using Map.Models.Hex;
 using Map.Models.Terrain;
 using Players.Models.Player;
 
 namespace Units.Models.Unit
 {
-    public interface IUnitData
+    public interface IUnitData: IEntity
     {
         IPlayerData Master { get; }
 
@@ -25,11 +26,7 @@ namespace Units.Models.Unit
 
         bool CanStayOn(IHexData destination);
         
-        bool CanMoveTo(IHexData destination);
-
-        bool PlaceAt(IHexData destination);
-        
-        bool MoveTo(IHexData destination);
+        bool MoveTo(IHexData destination, float distance);
         
         bool CanAttack(IUnitData target);
         

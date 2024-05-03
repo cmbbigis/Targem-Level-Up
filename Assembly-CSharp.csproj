@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Cities\Models\Effects\IEffect.cs" />
+    <Compile Include="Assets\Scripts\Core\IEntity.cs" />
     <Compile Include="Assets\Scripts\Map\Models\Hex\IHexData.cs" />
     <Compile Include="Assets\Scripts\UI\Map\Hex\HexManager.cs" />
     <Compile Include="Assets\Scripts\Resources\Models\Resource\ResourceType.cs" />
@@ -62,19 +63,20 @@
     <Compile Include="Assets\Scripts\Core\GameManager.cs" />
     <Compile Include="Assets\Scripts\Players\PlayerManager.cs" />
     <Compile Include="Assets\Scripts\UI\InputManager.cs" />
+    <Compile Include="Assets\Scripts\Units\Models\Unit\UnitData.cs" />
     <Compile Include="Assets\Scripts\Common\Static\UISettings\HexMetrics.cs" />
     <Compile Include="Assets\Scripts\Map\Models\Terrain\TerrainType.cs" />
     <Compile Include="Assets\Scripts\Cities\CityManager.cs" />
     <Compile Include="Assets\Scripts\UI\Map\Unit\UnitManager.cs" />
     <Compile Include="Assets\NotSorted\Assets\Fantasy Character Pixel Art Pack\Script\CharacterAnimation.cs" />
     <Compile Include="Assets\Scripts\Resources\Models\Resource\IResourceData.cs" />
-    <Compile Include="Assets\Scripts\Units\Models\Unit\Baza.cs" />
     <Compile Include="Assets\Scripts\Map\Models\Hex\HexData.cs" />
     <Compile Include="Assets\Scripts\Map\MapManager.cs" />
     <Compile Include="Assets\Scripts\Players\Models\Player\PlayerData.cs" />
     <Compile Include="Assets\Scripts\Cities\Models\City\ICityData.cs" />
     <Compile Include="Assets\Scripts\UI\Map\Grid\GridManager.cs" />
     <Compile Include="Assets\Scripts\Core\PlayerTurnState.cs" />
+    <None Include="Assets\SpriteOutline\Shaders\SpriteOutline.shader" />
     <Reference Include="UnityEngine">
       <HintPath>D:\soft\unity\2022.3.22f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>

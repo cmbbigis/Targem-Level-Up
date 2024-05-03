@@ -48,7 +48,7 @@ namespace Core
                 },
                 TurnState = new PlayerTurnState()
             };
-            var unitA = new Baza(playerA.Data, UnitType.Base, 10, 3, 3, new HashSet<TerrainType> {TerrainType.Dirt, TerrainType.Grass});
+            var unitA = new UnitData(playerA.Data, UnitType.Base, 10, 3, 3, new HashSet<TerrainType> {TerrainType.Dirt, TerrainType.Grass});
             playerA.Data.AddUnit(unitA);
             _mapManager.PlaceUnitRandomly(unitA);
 
@@ -61,7 +61,7 @@ namespace Core
                 },
                 TurnState = new PlayerTurnState()
             };
-            var unitB = new Baza(playerB.Data, UnitType.Huyaza, 10, 3, 3, new HashSet<TerrainType> {TerrainType.Dirt, TerrainType.Grass});
+            var unitB = new UnitData(playerB.Data, UnitType.Huyaza, 10, 3, 3, new HashSet<TerrainType> {TerrainType.Dirt, TerrainType.Grass});
             playerB.Data.AddUnit(unitB);
             _mapManager.PlaceUnitRandomly(unitB);
             
@@ -72,7 +72,7 @@ namespace Core
         {
             if (!CanMove(CurrentPlayerData))
                 EndTurn();
-            if (CurrentPlayer.TurnState.ChosenEntity is IUnitData)
+            if (CurrentPlayer.TurnState.GetCurrent() is IUnitData)
             {
                 
             }
@@ -80,49 +80,77 @@ namespace Core
         
         public void EndTurn()
         {
+            CurrentPlayer.TurnState.EndTurn();
             _currentPlayerIndex = (_currentPlayerIndex + 1) % Players.Length;
             StartTurn();
         }
 
         private void StartTurn()
         {
-            if (CurrentPlayerData.Units.Count > 0)
-            {
-                _mapManager.FocusOnUnit(CurrentPlayerData.Units[0]);
-            }
             foreach (var unit in CurrentPlayerData.Units)
-            {
                 unit.StartTurn();
+            CurrentPlayer.TurnState.StartTurn();
+            var current = CurrentPlayer.TurnState.GetCurrent();
+            if (current != null)
+            {
+                _mapManager.FocusOnEntity(current);
+                if (current is IUnitData unit)
+                    ShowUnitPaths(unit);
             }
             Debug.Log($"Player {_currentPlayerIndex + 1} turns");
         }
 
+        public void ShowUnitPaths(IUnitData unit)
+        {
+            CurrentPlayer.TurnState.SetHighlightedEntities(_mapManager.FindPossibleHexes(unit));
+        }
+        
         public void HandleUnitClicked(IUnitData unit)
         {
-            _mapManager.FocusOnUnit(unit);
-            CurrentPlayer.TurnState.ChosenEntity = unit;
+            if (CurrentPlayer.TurnState.ChosenEntities.Contains(unit))
+            {
+                CurrentPlayer.TurnState.PopChosenEntity(unit);
+                CurrentPlayer.TurnState.ClearHighlightedEntity();
+            }
+            else if (CurrentPlayerData.Units.Contains(unit))
+            {
+                CurrentPlayer.TurnState.SetChosenEntity(unit);
+                ShowUnitPaths(unit);
+            }
+            else
+            {
+                CurrentPlayer.TurnState.SetChosenEntity(unit);
+                ShowUnitPaths(unit);
+            }
         }
 
         public void HandleHexClicked(IHexData hex)
         {
-            if (CurrentPlayer.TurnState.ChosenEntity is IUnitData unit && CurrentPlayerData.Units.Contains(unit))
+            if (CurrentPlayer.TurnState.GetCurrent() is IUnitData unit && CurrentPlayerData.Units.Contains(unit))
             {
-                if (unit.MoveTo(hex))
+                if (_mapManager.MoveUnitTo(unit, hex))
                 {
-                    
+                    ShowUnitPaths(unit);
                 }
-                else
-                {
-                    
-                }
-                    //Debug.Log($"moved to {unit.Hex.X} {unit.Hex.Y}");
-                // else
             }
             else
             {
                 _mapManager.FocusOnHex(hex);
+                if (CurrentPlayer.TurnState.ChosenEntities.Contains(hex))
+                    CurrentPlayer.TurnState.SetChosenEntity(hex);
+                else    
+                    CurrentPlayer.TurnState.PopChosenEntity(hex);
             }
         }
 
+        public void MoveCamera(Vector3 diff)
+        {
+            _mapManager.MoveCamera(diff);
+        }
+        
+        public void ZoomCamera(float scroll)
+        {
+            _mapManager.ZoomCamera(scroll);
+        }
     }
 }
