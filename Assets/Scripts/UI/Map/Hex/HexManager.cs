@@ -1,41 +1,58 @@
 using System;
+using Map.Models.Hex;
 using Map.Models.Terrain;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace UI.Map.Hex
 {
     public class HexManager: MonoBehaviour
     {
-        [SerializeField] private float liftHeight;
-        private BoxCollider2D _collider;
+        public IHexData _data;
+        private GameObject _obj;
+        private SpriteRenderer _upperSprite;
+        private SpriteRenderer _lowerSprite;
+        public UnityEvent<IHexData> onHexClicked;
+        public static event Action<HexManager> OnHexManagerCreated;
+        public static event Action<HexManager> OnHexManagerDestroyed;
+
+        [SerializeField] public Sprite[] upperByTerrainType;
+        [SerializeField] public Sprite[] lowerByTerrainType;
+
+        void Awake() {
+            OnHexManagerCreated?.Invoke(this);
+        }
+
+        void OnDestroy() {
+            OnHexManagerDestroyed?.Invoke(this);
+        }
+
+        private Sprite GetUpper() => upperByTerrainType[(int) _data.Terrain];
+        private Sprite GetLower() => lowerByTerrainType[(int) _data.Terrain];
+
+        public void Init(IHexData data, GameObject obj)
+        {
+            _data = data;
+            _obj = obj;
+
+            var sprites = _obj.GetComponentsInChildren<SpriteRenderer>();
+            (_upperSprite, _lowerSprite) = (sprites[0], sprites[1]);
+
+            _upperSprite.sprite = GetUpper();
+            _lowerSprite.sprite = GetLower();
+        }
+
+        private void OnMouseUpAsButton()
+        {
+            onHexClicked.Invoke(_data);
+        }
         
-        void Start()
-        {
-            TryGetComponent(out _collider);
-        }
-
-        public void Init(TerrainType type)
-        {
-            //var ch = GetComponentsInChildren<GameObject>();
-            //var (upper, lower) = (ch[0].GetComponentsInChildren<GameObject>(), ch[1]);
-        }
-
         private void OnMouseEnter()
         {
-            if (_collider == null)
-                return;
-            _collider.offset.Scale(new Vector2(0, 0.25f));
-            _collider.size.Scale(new Vector2(1, 1));
-            transform.position += new Vector3(0, liftHeight, 0);
         }
 
         private void OnMouseExit()
         {
-            if (_collider == null)
-                return;
-            _collider.offset.Scale(new Vector2(0, 0));
-            _collider.size.Scale(new Vector2(1, 0.25f));
-            transform.position += new Vector3(0, -liftHeight, 0);
         }
     }
 }

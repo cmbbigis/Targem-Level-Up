@@ -1,16 +1,16 @@
-using System;
 using System.Collections.Generic;
+using Map.Models.Hex;
 using Map.Models.Terrain;
+using UI.Map.Hex;
+using UI.Map.Unit;
 using Units.Models.Unit;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.Tilemaps;
 
 namespace UI.Map.Grid
 {
     public class GridManager : MonoBehaviour
     {
-        [SerializeField] private GameObject[] hexPrefabByType;
+        [SerializeField] private GameObject hexBase;
         [SerializeField] private GameObject[] unitPrefabByType;
         [SerializeField] private Camera cam;
         [SerializeField] private GameObject hexesObject;
@@ -34,10 +34,24 @@ namespace UI.Map.Grid
             CenterCam();
         }
         
-        private void MoveObjectToReal(GameObject obj, Vector3 realCords) =>
+        private void FillEmpty()
+        {
+            for (var x = -1; x <= _width; x++)
+            {
+                InitHexAtCords(new Vector2(x, -1f), new HexData(x, -1, TerrainType.Ocean));
+                InitHexAtCords(new Vector2(x, _height), new HexData(x, _height, TerrainType.Ocean));
+            }
+            for (var y = -1; y <= _height; y++)
+            {
+                InitHexAtCords(new Vector2(-1, y), new HexData(-1, y, TerrainType.Ocean));
+                InitHexAtCords(new Vector2(_width, y), new HexData(_width, y, TerrainType.Ocean));
+            }
+        }
+        
+        private static void MoveObjectToReal(GameObject obj, Vector3 realCords) =>
             obj.transform.position = realCords;
 
-        private void MoveObjectTo(GameObject obj, Vector2 cords) =>
+        private static void MoveObjectTo(GameObject obj, Vector2 cords) =>
             MoveObjectToReal(obj, TransformCords(cords));
         
         public void MoveUnitTo(IUnitData data, Vector2 cords)
@@ -45,7 +59,7 @@ namespace UI.Map.Grid
             MoveObjectTo(_units[data], cords);
         }
 
-        private Vector3 TransformCords(Vector2 cords)
+        private static Vector3 TransformCords(Vector2 cords)
         {
             var (x, y) = (cords.x, cords.y);
             return new Vector3((float) (x + 0.5 * (y % 2)), (float) (y * 0.75 - 0.5));
@@ -55,12 +69,13 @@ namespace UI.Map.Grid
 
         public Vector3 GetRealCords(Vector2 cords) => TransformCords(cords);
 
-        public void InitTileAtCords(Vector2 cords, TerrainType type)
+        public void InitHexAtCords(Vector2 cords, IHexData data)
         {
-            var spawnedTile = Instantiate(hexPrefabByType[(int)type], TransformCords(cords),
+            var spawnedTile = Instantiate(hexBase, TransformCords(cords),
                 Quaternion.identity);
             spawnedTile.name = $"Hex {cords.x} {cords.y}";
             spawnedTile.transform.SetParent(hexesObject.transform);
+            spawnedTile.GetComponent<HexManager>().Init(data, spawnedTile);
             _hexes[cords] = spawnedTile;
         }
         
@@ -70,21 +85,8 @@ namespace UI.Map.Grid
                 Quaternion.identity);
             spawnedUnit.name = $"Unit {data.UnitType} of {data.Master.Name}";
             spawnedUnit.transform.SetParent(unitsObject.transform);
+            spawnedUnit.GetComponent<UnitManager>().Init(data);
             _units[data] = spawnedUnit;
-        }
-
-        private void FillEmpty()
-        {
-            for (var x = -1; x <= _width; x++)
-            {
-                InitTileAtCords(new Vector2(x, -1f), TerrainType.Ocean);
-                InitTileAtCords(new Vector2(x, _height), TerrainType.Ocean);
-            }
-            for (var y = -1; y <= _height; y++)
-            {
-                InitTileAtCords(new Vector2(-1, y), TerrainType.Ocean);
-                InitTileAtCords(new Vector2(_width, y), TerrainType.Ocean);
-            }
         }
         
         private void CenterCamAtReal(Vector3 cords) =>
@@ -98,6 +100,9 @@ namespace UI.Map.Grid
         
         public void CenterCamOnUnit(IUnitData data) =>
             CenterCamOnObject(_units[data]);
+        
+        public void CenterCamOnHex(IHexData data) =>
+            CenterCamOnObject(_hexes[data.Cords]);
 
         public void Zoom(float hexes) =>
             cam.orthographicSize = hexes * 0.5f;
@@ -106,23 +111,6 @@ namespace UI.Map.Grid
         {
             CenterCamAtHex(new Vector2(_width / 2, _height / 2));
             Zoom(_height);
-        }
-        
-        void MakeGrid()
-        {
-            var rand = new System.Random();
-            for (var y = 0; y < _height; y++)
-            {
-                for (var x = 0; x < _width; x++)
-                {
-                    var cords = new Vector2(x, y);
-                    var type = rand.Next(0, 4);
-                    var spawnedTile = Instantiate(hexPrefabByType[type], TransformCords(cords),
-                        Quaternion.identity);
-                    spawnedTile.name = $"Tile {x} {y}";
-                    _hexes[cords] = spawnedTile;
-                }
-            }
         }
     }
 }

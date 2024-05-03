@@ -1,4 +1,5 @@
 ﻿using Map.Models.Hex;
+using UnityEngine;
 
 namespace Map.Models.Map
 {
@@ -6,7 +7,7 @@ namespace Map.Models.Map
     {
         int Width { get; }
         int Height { get; }
-        IHexData GetHexagonAt(int x, int y);
+        IHexData GetHexagonAt(Vector2 cords);
         void MakeMap();
     }
 }

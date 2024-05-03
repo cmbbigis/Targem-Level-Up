@@ -13,6 +13,7 @@ namespace Map.Models.Hex
         {
             X = x;
             Y = y;
+            Terrain = type;
         }
 
         public int X { get; }

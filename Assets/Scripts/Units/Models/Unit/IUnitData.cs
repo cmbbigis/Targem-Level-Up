@@ -13,6 +13,8 @@ namespace Units.Models.Unit
 
         bool IsAlive { get; }
         
+        IHexData Hex { get; set; }
+        
         int HealthPoints { get; set; }
         
         int AttackPower { get; }
@@ -21,8 +23,12 @@ namespace Units.Models.Unit
 
         HashSet<TerrainType> AllowedTerrainTypes { get; }
 
+        bool CanStayOn(IHexData destination);
+        
         bool CanMoveTo(IHexData destination);
 
+        bool PlaceAt(IHexData destination);
+        
         bool MoveTo(IHexData destination);
         
         bool CanAttack(IUnitData target);
@@ -30,5 +36,11 @@ namespace Units.Models.Unit
         bool Attack(IUnitData target);
         
         bool Die();
+
+        void StartTurn();
+
+        bool CanMove();
+        
+        MovementInfo MovementInfo { get; }
     }
 }

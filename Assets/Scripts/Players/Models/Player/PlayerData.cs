@@ -5,7 +5,7 @@ using Units.Models.Unit;
 
 namespace Players.Models.Player
 {
-    public class Player: IPlayerData
+    public class PlayerData: IPlayerData
     {
         public string Name { get; set; }
         public List<ICityData> Cities { get; set; }
