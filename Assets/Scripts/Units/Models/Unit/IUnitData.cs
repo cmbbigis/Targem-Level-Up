@@ -8,36 +8,41 @@ namespace Units.Models.Unit
 {
     public interface IUnitData: IEntity
     {
+        // MASTER
         IPlayerData Master { get; }
 
+        // TYPING
         UnitType UnitType { get; }
-
-        bool IsAlive { get; }
         
+        // MOVEMENT
         IHexData Hex { get; set; }
-        
-        int HealthPoints { get; set; }
-        
-        int AttackPower { get; }
-        
-        int MovementRange { get; }
-
+        float MovementRange { get; }
+        Dictionary<TerrainType, int> MovementCosts { get; set; }
         HashSet<TerrainType> AllowedTerrainTypes { get; }
-
         bool CanStayOn(IHexData destination);
-        
         bool MoveTo(IHexData destination, float distance);
+        float GetMovementCost(IHexData hex);
         
-        bool CanAttack(IUnitData target);
+        // ATTACKING
+        float HealthPoints { get; set; }
+        float Defense { get; set; }
+        ICollection<Attack> Attacks { get; set; }
+        bool IsAlive { get; }
+        bool CanAttack(Attack attack, IUnitData target);
+        bool Attack(Attack attack, IUnitData target);
+        void Die();
+        float CalculateDamage(Attack attack, IUnitData attacker, IUnitData defender);
+        float GetSpecialAbilitiesModifier() => 1.0f;
+        float GetDefensiveAbilitiesModifier() => 1.0f;
+        float GetTerrainModifier(TerrainType attackerTerrain, TerrainType defenderTerrain);
         
-        bool Attack(IUnitData target);
+        // BUILDING
+        float BuildingPower { get; set; }
         
-        bool Die();
-
+        // TURNING
         void StartTurn();
-
-        bool CanMove();
-        
         MovementInfo MovementInfo { get; }
+        bool CanMove();
+
     }
 }

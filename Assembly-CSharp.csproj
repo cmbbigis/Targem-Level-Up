@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Cities\Models\Effects\IEffect.cs" />
+    <Compile Include="Assets\Scripts\Core\SettingsManager.cs" />
     <Compile Include="Assets\Scripts\Core\IEntity.cs" />
     <Compile Include="Assets\Scripts\Map\Models\Hex\IHexData.cs" />
     <Compile Include="Assets\Scripts\UI\Map\Hex\HexManager.cs" />
@@ -55,7 +56,7 @@
     <Compile Include="Assets\Scripts\Units\Models\Unit\UnitType.cs" />
     <Compile Include="Assets\Scripts\Resources\ResourceManager.cs" />
     <Compile Include="Assets\Scripts\Core\Player.cs" />
-    <Compile Include="Assets\Scripts\Map\Models\Hex\HexDataExtensions.cs" />
+    <Compile Include="Assets\Scripts\Map\Models\InteractiveObjects\InteractiveObject.cs" />
     <Compile Include="Assets\Scripts\Players\Models\Player\IPlayerData.cs" />
     <Compile Include="Assets\Scripts\Units\Models\Unit\IUnitData.cs" />
     <Compile Include="Assets\Scripts\Map\Models\Map\IMapData.cs" />
@@ -68,11 +69,15 @@
     <Compile Include="Assets\Scripts\Map\Models\Terrain\TerrainType.cs" />
     <Compile Include="Assets\Scripts\Cities\CityManager.cs" />
     <Compile Include="Assets\Scripts\UI\Map\Unit\UnitManager.cs" />
+    <Compile Include="Assets\Scripts\Units\Models\Unit\Units\Infantry.cs" />
     <Compile Include="Assets\NotSorted\Assets\Fantasy Character Pixel Art Pack\Script\CharacterAnimation.cs" />
     <Compile Include="Assets\Scripts\Resources\Models\Resource\IResourceData.cs" />
     <Compile Include="Assets\Scripts\Map\Models\Hex\HexData.cs" />
+    <Compile Include="Assets\Scripts\Units\Models\Unit\Units\Builder.cs" />
     <Compile Include="Assets\Scripts\Map\MapManager.cs" />
     <Compile Include="Assets\Scripts\Players\Models\Player\PlayerData.cs" />
+    <Compile Include="Assets\Scripts\Resources\Models\Resource\ResourceData.cs" />
+    <Compile Include="Assets\Scripts\Units\Models\Unit\Units\Archer.cs" />
     <Compile Include="Assets\Scripts\Cities\Models\City\ICityData.cs" />
     <Compile Include="Assets\Scripts\UI\Map\Grid\GridManager.cs" />
     <Compile Include="Assets\Scripts\Core\PlayerTurnState.cs" />
@@ -832,6 +837,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
+      <Project>{0a2fb991-9c53-7fce-fc6b-8056f0321f09}</Project>
+      <Name>Assembly-CSharp-firstpass</Name>
+    </ProjectReference>
+    <ProjectReference Include="AYellowpaper.SerializedCollections.csproj">
+      <Project>{34206639-44b5-9723-8933-f31a2c1af1a8}</Project>
+      <Name>AYellowpaper.SerializedCollections</Name>
+    </ProjectReference>
+    <ProjectReference Include="AYellowpaper.SerializedCollections.Editor.csproj">
+      <Project>{eeacddf5-c3df-7d8e-a054-ca872e00cff5}</Project>
+      <Name>AYellowpaper.SerializedCollections.Editor</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

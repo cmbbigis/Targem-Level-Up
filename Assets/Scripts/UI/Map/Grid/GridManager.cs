@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core;
 using Map.Models.Hex;
 using Map.Models.Terrain;
 using UI.Map.Hex;
@@ -16,6 +17,10 @@ namespace UI.Map.Grid
         [SerializeField] private Camera cam;
         [SerializeField] private GameObject hexesObject;
         [SerializeField] private GameObject unitsObject;
+        
+        [SerializeField] private float camAutoZoomCoefficient = 0.05f;
+        [SerializeField] private float camAutoMoveCoefficient = 0.05f;
+        [SerializeField] private float camMoveCoefficient = 0.05f;
 
         private int _width;
         private int _height;
@@ -26,7 +31,15 @@ namespace UI.Map.Grid
         private Vector3? _camTarget;
         private Vector3? _camDiff;
         private float? _zoomTarget;
-        private float? _zoomDiff = 0.1f;
+        private float? _zoomDiff;
+        
+        [SerializeField] private SettingsManager settingsManager;
+        private SettingsManager _settingsManager;
+
+        private void Start()
+        {
+            _settingsManager = settingsManager.GetComponent<SettingsManager>();
+        }
 
         private void Update()
         {
@@ -49,20 +62,6 @@ namespace UI.Map.Grid
             }
         }
 
-        private void SetCamTarget(Vector3 cords)
-        {
-            var diff = cords - cam.transform.position;
-            _camTarget = cords;
-            _camDiff = diff / 20;
-        }
-
-        private void SetZoomTarget(float zoom)
-        {
-            var diff = zoom - cam.orthographicSize;
-            _zoomTarget = zoom;
-            _zoomDiff = diff / 20;
-        }
-
         public void Init(int width, int height)
         {
             _width = width;
@@ -75,6 +74,7 @@ namespace UI.Map.Grid
             CenterCam();
         }
         
+        // MAP
         private void FillEmpty()
         {
             for (var x = -1; x <= _width; x++)
@@ -88,28 +88,21 @@ namespace UI.Map.Grid
                 InitHexAtCords(new Vector2(_width, y), new HexData(_width, y, TerrainType.Ocean));
             }
         }
-        
         private static void MoveObjectToReal(GameObject obj, Vector3 realCords) =>
             obj.transform.position = realCords;
-
         private static void MoveObjectTo(GameObject obj, Vector2 cords) =>
             MoveObjectToReal(obj, TransformCords(cords));
-        
         public void MoveUnitTo(IUnitData data, Vector2 cords)
         {
             MoveObjectTo(_units[data], cords);
         }
-
         private static Vector3 TransformCords(Vector2 cords)
         {
             var (x, y) = (cords.x, cords.y);
             return new Vector3((float) (x + 0.5 * (y % 2)), (float) (y * 0.75 - 0.5));
         }
-
         public GameObject GetTileAtCords(Vector2 cords) => _hexes[cords];
-
         public Vector3 GetRealCords(Vector2 cords) => TransformCords(cords);
-
         public void InitHexAtCords(Vector2 cords, IHexData data)
         {
             var spawnedTile = Instantiate(hexBase, TransformCords(cords),
@@ -119,10 +112,11 @@ namespace UI.Map.Grid
             spawnedTile.GetComponent<HexManager>().Init(data, spawnedTile);
             _hexes[cords] = spawnedTile;
         }
-        
         public void InitUnitAtCords(Vector2 cords, IUnitData data)
         {
-            var spawnedUnit = Instantiate(unitPrefabByType[(int)data.UnitType], TransformCords(cords),
+            // var spawnedUnit = Instantiate(unitPrefabByType[(int)data.UnitType], TransformCords(cords),
+                // Quaternion.identity);
+            var spawnedUnit = Instantiate(_settingsManager.GetUnitPrefab(data.UnitType), TransformCords(cords),
                 Quaternion.identity);
             spawnedUnit.name = $"Unit {data.UnitType} of {data.Master.Name}";
             spawnedUnit.transform.SetParent(unitsObject.transform);
@@ -130,37 +124,42 @@ namespace UI.Map.Grid
             _units[data] = spawnedUnit;
         }
         
+        // CAMERA
+        private void SetCamTarget(Vector3 cords)
+        {
+            var diff = cords - cam.transform.position;
+            _camTarget = cords;
+            _camDiff = diff * camAutoMoveCoefficient;
+        }
+        private void SetZoomTarget(float zoom)
+        {
+            var diff = zoom - cam.orthographicSize;
+            _zoomTarget = zoom;
+            _zoomDiff = diff * camAutoZoomCoefficient;
+        }
         private void CenterCamAtReal(Vector3 cords) =>
             SetCamTarget(cords + new Vector3(0, 0, -10));
-
-        public void CenterCamAtHex(Vector2 cords) =>
+        private void CenterCamAtHex(Vector2 cords) =>
             CenterCamAtReal(TransformCords(cords));
-
         private void CenterCamOnObject(GameObject obj) =>
             CenterCamAtReal(obj.transform.position);
-        
         public void CenterCamOnUnit(IUnitData data) =>
             CenterCamOnObject(_units[data]);
-        
         public void CenterCamOnHex(IHexData data) =>
             CenterCamOnObject(_hexes[data.Cords]);
-
-        public void Zoom(float hexes) =>
+        private void Zoom(float hexes) =>
             SetZoomTarget(hexes * 0.5f);
-
         public void ZoomOn(float zoom)
         {
             _zoomTarget = null;
             cam.orthographicSize -= zoom;
         }
-
         public void MoveCamera(Vector3 diff)
         {
             _camTarget = null;
             _camDiff = null;
-            cam.transform.position += diff / 20;
+            cam.transform.position += diff * camMoveCoefficient;
         }
-
         public void CenterCam()
         {
             CenterCamAtHex(new Vector2(_width / 2, _height / 2));

@@ -48,26 +48,18 @@ namespace Map
             return newPath;
         }
     }
-
-
     
     public class MapManager: MonoBehaviour, IMapData
     {
         [SerializeField] private int width, height;
+        public int Width => width;
+        public int Height => height;
+        private readonly Dictionary<Vector2, IHexData> _hexes = new();
+        
         [SerializeField] private GameObject gridManagerObject;
         private GridManager _gridManager;
-
-        private readonly Dictionary<Vector2, IHexData> _hexes = new();
         private readonly Random _rand = new();
-
-        public static Dictionary<TerrainType, float> WeightByTerrainType = new ()
-        {
-            {TerrainType.Grass, 1},
-            {TerrainType.Dirt, 1},
-            {TerrainType.Mountain, 3},
-            {TerrainType.Ocean, int.MaxValue}
-        };
-
+        
         private void Awake()
         {
             _gridManager = gridManagerObject.GetComponent<GridManager>();
@@ -87,26 +79,18 @@ namespace Map
             foreach (var h in _hexes.Values.Where(x => x.Unit != null))
                 _gridManager.MoveUnitTo(h.Unit, h.Cords);
         }
-        
-        public void MakeMap()
-        {
-            MakeSimpleRandomMap();
-        }
 
+        // CAMERA
         public void MoveCamera(Vector3 diff) =>
             _gridManager.MoveCamera(diff);
-        
         public void ZoomCamera(float diff) =>
             _gridManager.ZoomOn(diff);
-        
         public void FocusOnUnit(IUnitData unit)
         {
             _gridManager.CenterCamOnUnit(unit);
         }
-        
         public void FocusOnHex(IHexData hex) =>
             _gridManager.CenterCamOnHex(hex);
-
         public void FocusOnEntity(IEntity entity)
         {
             if (entity is IUnitData unit)
@@ -115,6 +99,13 @@ namespace Map
                 FocusOnHex(hex);
         }
 
+        // MAP
+        public void MakeMap() =>
+            GenerateMap();
+        public IHexData GetHexagonAt(Vector2 cords) => _hexes[cords];
+        public IHexData GetHexagonAt(int x, int y) => GetHexagonAt(new Vector2(x, y));
+        public IHexData SetHexagonAt(Vector2 cords, IHexData hex) => _hexes[cords] = hex;
+        public IHexData SetHexagonAt(int x, int y, IHexData hex) => SetHexagonAt(new Vector2(x, y), hex);
         private void MakeSimpleRandomMap()
         {
             for (var y = 0; y < height; y++)
@@ -127,7 +118,34 @@ namespace Map
             }
             FillEmpty();
         }
-        
+        public void GenerateMap()
+        {
+            // Генерация шума Перлина
+            for (var x = 0; x < Width; x++)
+            {
+                for (var y = 0; y < Height; y++)
+                {
+                    var noise = Mathf.PerlinNoise(x * 0.1f, y * 0.1f);
+                    var terrain = DetermineTerrainByNoise(noise);
+                    SetHexagonAt(x, y, new HexData(x, y, terrain));
+                }
+            }
+
+            // Распределение ресурсов и размещение городов
+            PlaceResourcesAndCities();
+        }
+
+        private TerrainType DetermineTerrainByNoise(float noiseValue)
+        {
+            var types = Enum.GetValues(typeof(TerrainType)).Cast<TerrainType>().ToArray();
+            return types[(int)Math.Floor(noiseValue * types.Length)];
+        }
+
+        private void PlaceResourcesAndCities()
+        {
+            // Реализуйте логику размещения ресурсов и городов
+        }
+
         private void FillEmpty()
         {
             for (var x = -1; x <= Width; x++)
@@ -141,13 +159,11 @@ namespace Map
                 InitHexAt(new HexData(Width, y, TerrainType.Ocean), new Vector2(Width, y));
             }
         }
-
         private void InitHexAt(IHexData hexData, Vector2 cords)
         {
             _gridManager.InitHexAtCords(cords, hexData);
             _hexes[cords] = hexData;
         }
-
         private bool InitUnitAt(IUnitData unitData, Vector2 cords)
         {
             var hex = GetHexagonAt(cords);
@@ -157,7 +173,6 @@ namespace Map
             _gridManager.InitUnitAtCords(cords, unitData);
             return true;
         }
-        
         [Obsolete]
         public void PlaceUnitRandomly(IUnitData unitData)
         {
@@ -169,14 +184,9 @@ namespace Map
                 f = InitUnitAt(unitData, cords);
             }
         }
-
-        private float GetHexWeight(IHexData hex)
-        {
-            return WeightByTerrainType[hex.Terrain];
-        }
-
+        
+        // PATHFINDING
         private bool IsCordsValid(Vector2 cords) => 0 <= cords.x && cords.x < width && 0 <= cords.y && cords.y < height;
-
         private List<IHexData> GetNeighbours(IHexData hex)
         {
             var possibleNeighbours = new Vector2[]
@@ -186,7 +196,6 @@ namespace Map
             };
             return (from n in possibleNeighbours where IsCordsValid(n) && _hexes.ContainsKey(n) select GetHexagonAt(n)).ToList();
         }
-        
         private float GetHexCapacity(IHexData hex)
         {
             throw new NotImplementedException();
@@ -221,9 +230,9 @@ namespace Map
 
                 visited.Add(currentHex);
 
-                foreach (var neighbor in GetNeighbours(currentHex).Where(unit.CanStayOn))
+                foreach (var neighbor in GetNeighbours(currentHex))
                 {
-                    var stepDistance = GetHexWeight(neighbor);
+                    var stepDistance = unit.GetMovementCost(neighbor);
                     var distance = currentPath.TotalDistance + stepDistance;
 
                     if (distance < distances[neighbor] && distance <= maxDistance)
@@ -248,10 +257,8 @@ namespace Map
 
             return paths;
         }
-
         public IEnumerable<IHexData> FindPossibleHexes(IUnitData unit) =>
             FindUnitPaths(unit, unit.MovementInfo.MovesLeft).Keys;
-        
         private List<ResourcePath> FindResourcePaths(IHexData source, IHexData destination, int maxPaths)
         {
             var paths = new List<ResourcePath>();
@@ -291,6 +298,7 @@ namespace Map
             return paths;
         }
         
+        //UNITS
         public bool PlaceUnitAt(IUnitData unit, IHexData hex)
         {
             if (!unit.CanStayOn(hex))
@@ -299,7 +307,6 @@ namespace Map
             unit.Hex = hex;
             return true;
         }
-        
         private (bool, UnitPath) CanMoveUnitTo(IUnitData unit, IHexData hex)
         {
             var possiblePaths = FindUnitPaths(unit, unit.MovementInfo.MovesLeft);
@@ -307,7 +314,6 @@ namespace Map
                 return (false, null);
             return (true, possiblePaths[hex]);
         }
-        
         public bool MoveUnitTo(IUnitData unit, IHexData hex)
         {
             var (canMoveTo, path) = CanMoveUnitTo(unit, hex);
@@ -315,9 +321,5 @@ namespace Map
                 return false;
             return unit.MoveTo(hex, path.TotalDistance);
         }
-
-        public int Width => width;
-        public int Height => height;
-        public IHexData GetHexagonAt(Vector2 cords) => _hexes[cords];
     }
 }

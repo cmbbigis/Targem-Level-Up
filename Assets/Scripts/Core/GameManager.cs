@@ -6,6 +6,7 @@ using Map.Models.Hex;
 using Map.Models.Terrain;
 using Players.Models.Player;
 using Units.Models.Unit;
+using Units.Models.Unit.Units;
 using UnityEngine;
 
 namespace Core
@@ -48,7 +49,7 @@ namespace Core
                 },
                 TurnState = new PlayerTurnState()
             };
-            var unitA = new UnitData(playerA.Data, UnitType.Base, 10, 3, 3, new HashSet<TerrainType> {TerrainType.Dirt, TerrainType.Grass});
+            var unitA = new Infantry(playerA.Data);
             playerA.Data.AddUnit(unitA);
             _mapManager.PlaceUnitRandomly(unitA);
 
@@ -61,7 +62,7 @@ namespace Core
                 },
                 TurnState = new PlayerTurnState()
             };
-            var unitB = new UnitData(playerB.Data, UnitType.Huyaza, 10, 3, 3, new HashSet<TerrainType> {TerrainType.Dirt, TerrainType.Grass});
+            var unitB = new Infantry(playerB.Data);
             playerB.Data.AddUnit(unitB);
             _mapManager.PlaceUnitRandomly(unitB);
             

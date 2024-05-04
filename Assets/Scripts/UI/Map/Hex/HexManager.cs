@@ -1,4 +1,5 @@
 using System;
+using Core;
 using Map.Models.Hex;
 using Map.Models.Terrain;
 using UnityEngine;
@@ -12,11 +13,13 @@ namespace UI.Map.Hex
         private GameObject _obj;
         private SpriteRenderer _upperSprite;
         private SpriteRenderer _lowerSprite;
+        
         public UnityEvent<IHexData> onHexClicked;
         public static event Action<HexManager> OnHexManagerCreated;
         public static event Action<HexManager> OnHexManagerDestroyed;
 
-        [SerializeField] public Sprite[] upperByTerrainType;
+        private SettingsManager _settingsManager;
+        
         [SerializeField] public Sprite[] lowerByTerrainType;
         private static readonly int OutlineEnabled = Shader.PropertyToID("_OutlineEnabled");
 
@@ -24,12 +27,27 @@ namespace UI.Map.Hex
             OnHexManagerCreated?.Invoke(this);
         }
 
+        private void Start()
+        {
+            _settingsManager = GameObject.Find("SettingsManager").GetComponent<SettingsManager>();
+        }
+
         void OnDestroy() {
             OnHexManagerDestroyed?.Invoke(this);
         }
 
-        private Sprite GetUpper() => upperByTerrainType[(int) _data.Terrain];
-        private Sprite GetLower() => lowerByTerrainType[(int) _data.Terrain];
+        private Sprite GetUpper()
+        {
+            if (_data.Resource != null)
+            {
+                if (_data.Resource.Level > 0)
+                    return _settingsManager.GetMiningBuildingHexSprites(_data.Terrain, _data.Resource.Type)[_data.Resource.Level];
+                return _settingsManager.GetResourceHexSprites(_data.Terrain, _data.Resource.Type)[0];
+            }
+            return _settingsManager.GetHexSprites(_data.Terrain)[0];
+        }
+
+        private Sprite GetLower() => _settingsManager.GetHexUnderSprites(_data.Terrain);
 
         public void Init(IHexData data, GameObject obj)
         {

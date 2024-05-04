@@ -152,8 +152,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 399b2f19c4ed4b419791398bd2512afd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 6
-  height: 4
+  width: 20
+  height: 20
   gridManagerObject: {fileID: 1049318601}
 --- !u!4 &16685533
 Transform:
@@ -319,6 +319,10 @@ MonoBehaviour:
   cam: {fileID: 1711817835}
   hexesObject: {fileID: 1441441576}
   unitsObject: {fileID: 1380987410}
+  camAutoZoomCoefficient: 0.05
+  camAutoMoveCoefficient: 0.05
+  camMoveCoefficient: 0.05
+  settingsManager: {fileID: 1083422796344717960}
 --- !u!4 &1049318603
 Transform:
   m_ObjectHideFlags: 0
@@ -698,6 +702,169 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1083422796344717960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4973586082355328390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97fef796e27544babcc1b1e80e3a8491, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefabByUnitType:
+    _serializedList:
+    - Key: 0
+      Value: {fileID: 1429070056341818, guid: c96cfe9a9c2ad044fa55c6d3e6a3182b, type: 3}
+    - Key: 1
+      Value: {fileID: 1429070056341818, guid: dd84e02e1004d404baae6a64b6c783ba, type: 3}
+    - Key: 2
+      Value: {fileID: 0}
+    - Key: 3
+      Value: {fileID: 0}
+    - Key: 4
+      Value: {fileID: 0}
+    - Key: 5
+      Value: {fileID: 0}
+    - Key: 6
+      Value: {fileID: 0}
+    - Key: 7
+      Value: {fileID: 0}
+    - Key: 8
+      Value: {fileID: 0}
+    - Key: 9
+      Value: {fileID: 1429070056341818, guid: c96cfe9a9c2ad044fa55c6d3e6a3182b, type: 3}
+  hexSprites:
+    _serializedList:
+    - Key: 0
+      Value:
+      - {fileID: 21300000, guid: 7c83a0d0e3f26f14fad67f09c09a126b, type: 3}
+      - {fileID: 21300000, guid: 2f73cd4adc1b4034a96188acfb3c9907, type: 3}
+      - {fileID: 21300000, guid: b842bd0d83e29d143b03321d19a76983, type: 3}
+    - Key: 1
+      Value:
+      - {fileID: 21300000, guid: 3b3321cc1f036ae40bf9e563e65de42e, type: 3}
+      - {fileID: 21300000, guid: 37997d5d5aafeeb48ac83259f1f0b2b3, type: 3}
+      - {fileID: 21300000, guid: 63db9fb2686855d46abacc49b85b3b76, type: 3}
+    - Key: 2
+      Value:
+      - {fileID: 21300000, guid: 2f73cd4adc1b4034a96188acfb3c9907, type: 3}
+      - {fileID: 21300000, guid: d8784f4965cc2b84ebb32aad196c5062, type: 3}
+      - {fileID: 21300000, guid: 0d7d23eff0a79bc449adb66d3e476b3d, type: 3}
+    - Key: 3
+      Value:
+      - {fileID: 21300000, guid: bf7dda1575db4684fa74abe958c92ddc, type: 3}
+      - {fileID: 21300000, guid: 6b0dab716466bb44cafe84aae48d0bf9, type: 3}
+    - Key: 4
+      Value:
+      - {fileID: 21300000, guid: 3c888111d45128c4eade72893dab33be, type: 3}
+      - {fileID: 21300000, guid: cfe851c9615300f46a4ec8e914bd7c50, type: 3}
+      - {fileID: 21300000, guid: f81abb8711ca7ea45a5bd2c3ad155496, type: 3}
+    - Key: 5
+      Value:
+      - {fileID: 21300000, guid: 2bd8c23ce2074b342abadb4b16216784, type: 3}
+      - {fileID: 21300000, guid: bb3a94320d21344459a9c2efdbadb51f, type: 3}
+      - {fileID: 21300000, guid: c6f3322d766d38c4aa6096659fc1aeb7, type: 3}
+    - Key: 6
+      Value:
+      - {fileID: 21300000, guid: 319aebb638f721a4783aca8d5c47429f, type: 3}
+      - {fileID: 21300000, guid: e12b1643fe7e8ec4ba37579ebfd0a5cf, type: 3}
+      - {fileID: 21300000, guid: 6c19ea9691dae52498f708d56b3734ef, type: 3}
+    - Key: 7
+      Value:
+      - {fileID: 21300000, guid: 6ec14f661ed66434e804650a3d803b31, type: 3}
+      - {fileID: 21300000, guid: 9056d8fff1edb0b4f9c6228720e4e27a, type: 3}
+      - {fileID: 21300000, guid: bb2e291666a46b341bd0d90aa2033895, type: 3}
+  hexUnderSprites:
+    _serializedList:
+    - Key: 0
+      Value: {fileID: 21300000, guid: 0c56e786e18275a4f927a005dbd8b2ca, type: 3}
+    - Key: 1
+      Value: {fileID: 21300000, guid: 0c56e786e18275a4f927a005dbd8b2ca, type: 3}
+    - Key: 2
+      Value: {fileID: 21300000, guid: 0c56e786e18275a4f927a005dbd8b2ca, type: 3}
+    - Key: 3
+      Value: {fileID: 21300000, guid: 6b0dab716466bb44cafe84aae48d0bf9, type: 3}
+    - Key: 4
+      Value: {fileID: 21300000, guid: ae8e4007623c5af40a8d4bd5c3e76ce5, type: 3}
+    - Key: 5
+      Value: {fileID: 21300000, guid: ae8e4007623c5af40a8d4bd5c3e76ce5, type: 3}
+    - Key: 6
+      Value: {fileID: 21300000, guid: ae8e4007623c5af40a8d4bd5c3e76ce5, type: 3}
+    - Key: 7
+      Value: {fileID: 21300000, guid: 0c56e786e18275a4f927a005dbd8b2ca, type: 3}
+  resourceHexSprites:
+    _serializedList:
+    - Key: 0
+      Value:
+        _serializedList:
+        - Key: 0
+          Value: []
+        - Key: 1
+          Value: []
+        - Key: 2
+          Value: []
+        - Key: 3
+          Value: []
+        - Key: 4
+          Value: []
+    - Key: 1
+      Value:
+        _serializedList: []
+    - Key: 2
+      Value:
+        _serializedList: []
+    - Key: 3
+      Value:
+        _serializedList: []
+    - Key: 4
+      Value:
+        _serializedList: []
+    - Key: 5
+      Value:
+        _serializedList: []
+    - Key: 6
+      Value:
+        _serializedList: []
+    - Key: 7
+      Value:
+        _serializedList: []
+  miningBuildingHexSprites:
+    _serializedList: []
+--- !u!4 &3595789438959913324
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4973586082355328390}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.2381003, y: 0.34386528, z: 0.042594537}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4973586082355328390
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3595789438959913324}
+  - component: {fileID: 1083422796344717960}
+  m_Layer: 0
+  m_Name: SettingsManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -711,3 +878,4 @@ SceneRoots:
   - {fileID: 1441441577}
   - {fileID: 1380987411}
   - {fileID: 1754482150}
+  - {fileID: 3595789438959913324}
