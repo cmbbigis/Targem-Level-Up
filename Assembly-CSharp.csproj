@@ -56,6 +56,7 @@
     <Compile Include="Assets\Scripts\Units\Models\Unit\UnitType.cs" />
     <Compile Include="Assets\Scripts\Resources\ResourceManager.cs" />
     <Compile Include="Assets\Scripts\Core\Player.cs" />
+    <Compile Include="Assets\Scripts\Common\SerializedDictionaryExtensions.cs" />
     <Compile Include="Assets\Scripts\Map\Models\InteractiveObjects\InteractiveObject.cs" />
     <Compile Include="Assets\Scripts\Players\Models\Player\IPlayerData.cs" />
     <Compile Include="Assets\Scripts\Units\Models\Unit\IUnitData.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="Assets\Scripts\Map\Models\Hex\HexData.cs" />
     <Compile Include="Assets\Scripts\Units\Models\Unit\Units\Builder.cs" />
     <Compile Include="Assets\Scripts\Map\MapManager.cs" />
+    <Compile Include="Assets\Scripts\Map\Models\InteractiveObjects\IInteractiveObject.cs" />
     <Compile Include="Assets\Scripts\Players\Models\Player\PlayerData.cs" />
     <Compile Include="Assets\Scripts\Resources\Models\Resource\ResourceData.cs" />
     <Compile Include="Assets\Scripts\Units\Models\Unit\Units\Archer.cs" />

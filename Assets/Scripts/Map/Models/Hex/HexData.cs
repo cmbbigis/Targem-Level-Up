@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Cities.Models.City;
+using Map.Models.InteractiveObjects;
 using Map.Models.Terrain;
 using Resources;
 using Resources.Models.Resource;
@@ -10,17 +11,18 @@ namespace Map.Models.Hex
 {
     public class HexData: IHexData
     {
-        public HexData(int x, int y, TerrainType type)
+        public HexData(int x, int y, TerrainType type, float z = 0)
         {
             X = x;
             Y = y;
             Terrain = type;
+            Z = z;
         }
 
         // COORDS
         public int X { get; }
         public int Y { get; }
-        public int Z { get; }
+        public float Z { get; }
         public Vector2 Cords => new (X, Y);
 
         // TYPING
@@ -28,7 +30,8 @@ namespace Map.Models.Hex
         public ICityData City { get; set; }
         public IUnitData Unit { get; set; }
         public IResourceData Resource { get; set; }
-        
+        public IInteractiveObject InteractiveObject { get; set; }
+
         // HIGHLIGHTING
         public bool IsChosen { get; set; }
         public bool IsHighlighted { get; set; }

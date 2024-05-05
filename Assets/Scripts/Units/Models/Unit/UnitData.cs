@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core;
 using Map.Models.Hex;
 using Map.Models.Terrain;
 using Players.Models.Player;
@@ -35,6 +36,7 @@ namespace Units.Models.Unit
             MovementInfo = new MovementInfo {MovesLeft = MovementRange};
             Attacks = attacks;
             BuildingPower = buildingPower;
+            MovementCosts = new Dictionary<TerrainType, float>();
         }
 
         // MASTER
@@ -46,7 +48,7 @@ namespace Units.Models.Unit
         // MOVEMENT
         public IHexData Hex { get; set; }
         public float MovementRange { get; protected set; }
-        public Dictionary<TerrainType, int> MovementCosts { get; set; }
+        public Dictionary<TerrainType, float> MovementCosts { get; set; }
         public HashSet<TerrainType> AllowedTerrainTypes { get; }
         public bool CanStayOn(IHexData destination) =>
             destination.Unit == null && AllowedTerrainTypes.Contains(destination.Terrain);

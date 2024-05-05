@@ -20,7 +20,6 @@ namespace UI.Map.Hex
 
         private SettingsManager _settingsManager;
         
-        [SerializeField] public Sprite[] lowerByTerrainType;
         private static readonly int OutlineEnabled = Shader.PropertyToID("_OutlineEnabled");
 
         void Awake() {
@@ -29,7 +28,6 @@ namespace UI.Map.Hex
 
         private void Start()
         {
-            _settingsManager = GameObject.Find("SettingsManager").GetComponent<SettingsManager>();
         }
 
         void OnDestroy() {
@@ -44,15 +42,18 @@ namespace UI.Map.Hex
                     return _settingsManager.GetMiningBuildingHexSprites(_data.Terrain, _data.Resource.Type)[_data.Resource.Level];
                 return _settingsManager.GetResourceHexSprites(_data.Terrain, _data.Resource.Type)[0];
             }
-            return _settingsManager.GetHexSprites(_data.Terrain)[0];
+
+            var sprites = _settingsManager.GetHexSprites(_data.Terrain);
+            return sprites[(int)Math.Floor(sprites.Length * _data.Z)];
         }
 
         private Sprite GetLower() => _settingsManager.GetHexUnderSprites(_data.Terrain);
 
-        public void Init(IHexData data, GameObject obj)
+        public void Init(IHexData data, GameObject obj, SettingsManager settingsManager)
         {
             _data = data;
             _obj = obj;
+            _settingsManager = settingsManager;
 
             var sprites = _obj.GetComponentsInChildren<SpriteRenderer>();
             (_upperSprite, _lowerSprite) = (sprites[0], sprites[1]);

@@ -17,7 +17,7 @@ namespace Units.Models.Unit
         // MOVEMENT
         IHexData Hex { get; set; }
         float MovementRange { get; }
-        Dictionary<TerrainType, int> MovementCosts { get; set; }
+        Dictionary<TerrainType, float> MovementCosts { get; set; }
         HashSet<TerrainType> AllowedTerrainTypes { get; }
         bool CanStayOn(IHexData destination);
         bool MoveTo(IHexData destination, float distance);

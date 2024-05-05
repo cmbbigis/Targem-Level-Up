@@ -8,7 +8,7 @@ using Map.Models.Terrain;
 using UI.Map.Grid;
 using Units.Models.Unit;
 using UnityEngine;
-using Random = System.Random;
+using Random = UnityEngine.Random;
 
 namespace Map
 {
@@ -58,7 +58,7 @@ namespace Map
         
         [SerializeField] private GameObject gridManagerObject;
         private GridManager _gridManager;
-        private readonly Random _rand = new();
+        private readonly System.Random _rand = new();
         
         private void Awake()
         {
@@ -120,14 +120,17 @@ namespace Map
         }
         public void GenerateMap()
         {
+            var seedX = Random.Range(0f, 100f);
+            var seedY = Random.Range(0f, 100f);
+
             // Генерация шума Перлина
             for (var x = 0; x < Width; x++)
             {
                 for (var y = 0; y < Height; y++)
                 {
-                    var noise = Mathf.PerlinNoise(x * 0.1f, y * 0.1f);
-                    var terrain = DetermineTerrainByNoise(noise);
-                    SetHexagonAt(x, y, new HexData(x, y, terrain));
+                    var noise = Mathf.PerlinNoise((x + seedX) * 0.1f, (y + seedY) * 0.1f);
+                    var (terrain, z) = DetermineTerrainByNoise(noise);
+                    InitHexAt(new HexData(x, y, terrain, z), new Vector2(x, y));
                 }
             }
 
@@ -135,10 +138,11 @@ namespace Map
             PlaceResourcesAndCities();
         }
 
-        private TerrainType DetermineTerrainByNoise(float noiseValue)
+        private (TerrainType, float) DetermineTerrainByNoise(float noiseValue)
         {
             var types = Enum.GetValues(typeof(TerrainType)).Cast<TerrainType>().ToArray();
-            return types[(int)Math.Floor(noiseValue * types.Length)];
+            var idx = (int) Math.Floor(noiseValue * types.Length);
+            return (types[idx], noiseValue * types.Length - idx);
         }
 
         private void PlaceResourcesAndCities()

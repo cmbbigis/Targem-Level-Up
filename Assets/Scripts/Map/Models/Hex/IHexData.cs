@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Cities.Models.City;
 using Core;
+using Map.Models.InteractiveObjects;
 using Map.Models.Terrain;
 using Resources;
 using Resources.Models.Resource;
@@ -15,7 +16,7 @@ namespace Map.Models.Hex
         // COORDS
         int X { get; }
         int Y { get; }
-        int Z { get; }
+        float Z { get; }
         public Vector2 Cords { get; }
         
         // TYPING
@@ -23,5 +24,6 @@ namespace Map.Models.Hex
         ICityData City { get; set; }
         IUnitData Unit { get; set; }
         IResourceData Resource { get; set; }
+        IInteractiveObject InteractiveObject { get; set; }
     }
 }

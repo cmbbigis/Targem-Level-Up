@@ -2,14 +2,14 @@ using System.Collections.Generic;
 
 namespace Map.Models.InteractiveObjects
 {
-    public class InteractiveObject
+    public class InteractiveObject : IInteractiveObject
     {
         public string Name { get; set; }
         public bool IsDestroyable { get; set; }
         public bool IsExplorable { get; set; }
-        public List<Item> Rewards { get; set; }
+        public List<IItem> Rewards { get; set; }
 
-        public InteractiveObject(string name, bool isDestroyable, bool isExplorable, List<Item> rewards)
+        public InteractiveObject(string name, bool isDestroyable, bool isExplorable, List<IItem> rewards)
         {
             Name = name;
             IsDestroyable = isDestroyable;
@@ -30,7 +30,7 @@ namespace Map.Models.InteractiveObjects
     }
 
     // Пример класса Item для наград
-    public class Item
+    public class Item : IItem
     {
         public string Name { get; set; }
         public int Quantity { get; set; }

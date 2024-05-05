@@ -18,6 +18,9 @@ namespace Core
         [SerializedDictionary("UnitType", "Prefab")]
         public SerializedDictionary<UnitType, GameObject> unitPrefabByUnitType;
         
+        [SerializedDictionary("UnitType", "Values")]
+        public SerializedDictionary<UnitType, SerializedDictionary<TerrainType, float>> hexMovementWeights;
+        
         [SerializedDictionary("TerrainType", "Sprites")]
         public SerializedDictionary<TerrainType, Sprite[]> hexSprites;
         
@@ -31,6 +34,7 @@ namespace Core
         public SerializedDictionary<TerrainType, SerializedDictionary<ResourceType, Sprite[]>> miningBuildingHexSprites;
 
         public GameObject GetUnitPrefab(UnitType type) => unitPrefabByUnitType[type];
+        public float GetHewMovementWeight(UnitType unitType, TerrainType terrainType) => hexMovementWeights[unitType][terrainType];
         public Sprite[] GetHexSprites(TerrainType terrainType) => hexSprites[terrainType];
         public Sprite GetHexUnderSprites(TerrainType terrainType) => hexUnderSprites[terrainType];
         public Sprite[] GetResourceHexSprites(TerrainType terrainType, ResourceType resourceType) =>

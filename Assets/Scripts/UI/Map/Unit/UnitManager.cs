@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using Common;
+using Core;
 using UI.Map.Hex;
 using Units.Models.Unit;
 using UnityEngine;
@@ -16,6 +19,8 @@ namespace UI.Map.Unit
         private static readonly int OutlineEnabled = Shader.PropertyToID("_OutlineEnabled");
         public static event Action<UnitManager> OnUnitManagerCreated;
         public static event Action<UnitManager> OnUnitManagerDestroyed;
+        private SettingsManager _settingsManager;
+
         
         void Awake() {
             onUnitClicked = new UnityEvent<IUnitData>();
@@ -26,10 +31,12 @@ namespace UI.Map.Unit
             OnUnitManagerDestroyed?.Invoke(this);
         }
 
-        public void Init(IUnitData data, GameObject obj)
+        public void Init(IUnitData data, GameObject obj, SettingsManager settingsManager)
         {
             _data = data;
             _obj = obj;
+            _settingsManager = settingsManager;
+            _data.MovementCosts = _settingsManager.hexMovementWeights[_data.UnitType].ToDictionary();
             
             var sprites = _obj.GetComponentsInChildren<SpriteRenderer>();
             (_character, _characterShadow) = (sprites[0], sprites[1]);

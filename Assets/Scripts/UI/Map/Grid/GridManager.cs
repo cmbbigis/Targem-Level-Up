@@ -70,7 +70,7 @@ namespace UI.Map.Grid
 
         public void PostInit()
         {
-            FillEmpty();
+            // FillEmpty();
             CenterCam();
         }
         
@@ -109,7 +109,7 @@ namespace UI.Map.Grid
                 Quaternion.identity);
             spawnedTile.name = $"Hex {cords.x} {cords.y}";
             spawnedTile.transform.SetParent(hexesObject.transform);
-            spawnedTile.GetComponent<HexManager>().Init(data, spawnedTile);
+            spawnedTile.GetComponent<HexManager>().Init(data, spawnedTile, _settingsManager);
             _hexes[cords] = spawnedTile;
         }
         public void InitUnitAtCords(Vector2 cords, IUnitData data)
@@ -120,7 +120,7 @@ namespace UI.Map.Grid
                 Quaternion.identity);
             spawnedUnit.name = $"Unit {data.UnitType} of {data.Master.Name}";
             spawnedUnit.transform.SetParent(unitsObject.transform);
-            spawnedUnit.GetComponent<UnitManager>().Init(data, spawnedUnit);
+            spawnedUnit.GetComponent<UnitManager>().Init(data, spawnedUnit, _settingsManager);
             _units[data] = spawnedUnit;
         }
         
