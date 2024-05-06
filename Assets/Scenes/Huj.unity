@@ -152,8 +152,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 399b2f19c4ed4b419791398bd2512afd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 10
-  height: 10
+  width: 25
+  height: 25
   gridManagerObject: {fileID: 1049318601}
 --- !u!4 &16685533
 Transform:
