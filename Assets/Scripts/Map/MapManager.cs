@@ -12,43 +12,6 @@ using Random = UnityEngine.Random;
 
 namespace Map
 {
-    public class ResourcePath
-    {
-        public List<IHexData> Hexes;
-        public float Capacity;
-
-        public ResourcePath()
-        {
-            Hexes = new List<IHexData>();
-            Capacity = float.MaxValue;
-        }
-    }
-    
-    public class UnitPath
-    {
-        public List<IHexData> Hexes { get; set; }
-        public float TotalDistance { get; set; }
-
-        public UnitPath()
-        {
-            Hexes = new List<IHexData>();
-            TotalDistance = 0;
-        }
-
-        public UnitPath(IEnumerable<IHexData> hexes, float totalDistance)
-        {
-            Hexes = new List<IHexData>(hexes);
-            TotalDistance = totalDistance;
-        }
-
-        public UnitPath AddStep(IHexData hex, float stepDistance)
-        {
-            var newPath = new UnitPath(Hexes, TotalDistance + stepDistance);
-            newPath.Hexes.Add(hex);
-            return newPath;
-        }
-    }
-    
     public class MapManager: MonoBehaviour, IMapData
     {
         [SerializeField] private int width, height;
@@ -324,6 +287,43 @@ namespace Map
             if (!canMoveTo)
                 return false;
             return unit.MoveTo(hex, path.TotalDistance);
+        }
+    }
+    
+    public class ResourcePath
+    {
+        public List<IHexData> Hexes;
+        public float Capacity;
+
+        public ResourcePath()
+        {
+            Hexes = new List<IHexData>();
+            Capacity = float.MaxValue;
+        }
+    }
+    
+    public class UnitPath
+    {
+        public List<IHexData> Hexes { get; set; }
+        public float TotalDistance { get; set; }
+
+        public UnitPath()
+        {
+            Hexes = new List<IHexData>();
+            TotalDistance = 0;
+        }
+
+        public UnitPath(IEnumerable<IHexData> hexes, float totalDistance)
+        {
+            Hexes = new List<IHexData>(hexes);
+            TotalDistance = totalDistance;
+        }
+
+        public UnitPath AddStep(IHexData hex, float stepDistance)
+        {
+            var newPath = new UnitPath(Hexes, TotalDistance + stepDistance);
+            newPath.Hexes.Add(hex);
+            return newPath;
         }
     }
 }
