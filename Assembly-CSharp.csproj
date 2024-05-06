@@ -60,13 +60,12 @@
     <Compile Include="Assets\Scripts\Map\Models\InteractiveObjects\InteractiveObject.cs" />
     <Compile Include="Assets\Scripts\Players\Models\Player\IPlayerData.cs" />
     <Compile Include="Assets\Scripts\Units\Models\Unit\IUnitData.cs" />
+    <Compile Include="Assets\Scripts\UI\InputController.cs" />
     <Compile Include="Assets\Scripts\Map\Models\Map\IMapData.cs" />
     <Compile Include="Assets\Scripts\Units\Models\Unit\MovementInfo.cs" />
     <Compile Include="Assets\Scripts\Core\GameManager.cs" />
     <Compile Include="Assets\Scripts\Players\PlayerManager.cs" />
-    <Compile Include="Assets\Scripts\UI\InputManager.cs" />
     <Compile Include="Assets\Scripts\Units\Models\Unit\UnitData.cs" />
-    <Compile Include="Assets\Scripts\Common\Static\UISettings\HexMetrics.cs" />
     <Compile Include="Assets\Scripts\Map\Models\Terrain\TerrainType.cs" />
     <Compile Include="Assets\Scripts\Cities\CityManager.cs" />
     <Compile Include="Assets\Scripts\UI\Map\Unit\UnitManager.cs" />
