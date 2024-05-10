@@ -119,39 +119,26 @@ namespace Map
         private (TerrainType, float) DetermineTerrainByNoise(float noiseValue)
         {
             var noise = noiseValue >= 0.999f ? 0.99f : noiseValue;
-            var noiseVal = noise * 100;
             var types = Enum.GetValues(typeof(TerrainType)).Cast<TerrainType>().ToArray();
             var totalWeights = _gameSettingsManager.biomeWeights.Values.Sum();
-            var leftSum = 1;
+            var noiseVal = noise * totalWeights;
+            var leftSum = totalWeights;
             
-            for (var i = types.Length; i > 0; i--)
+            for (var i = types.Length - 1; i > 0; i--)
             {
                 var type = types[i];
-                var weight = _gameSettingsManager.biomeWeights[type] / totalWeights;
+                var weight = _gameSettingsManager.biomeWeights[type];
                 leftSum -= weight;
                 if (noiseVal > leftSum)
-                    return (type, noiseVal - leftSum);
+                    return (type, (noiseVal - leftSum) / weight);
             }
 
-            return (types[0], noiseVal);
+            return (types[0], noiseVal / _gameSettingsManager.biomeWeights[types[0]]);
             
             var idx = (int) Math.Floor(noiseVal * types.Length);
             return (types[idx], noiseVal * types.Length - idx);
         }
-        
-        private TerrainType GetRandomBiomeByWeight()
-        {
-            var totalWeight = _gameSettingsManager.biomeWeights.Values.Sum();
-            var choice = Random.Range(0, totalWeight);
-            foreach (var biome in _gameSettingsManager.biomeWeights)
-            {
-                if (choice < biome.Value)
-                    return biome.Key;
-                choice -= biome.Value;
-            }
-            return TerrainType.Plains; // Fallback
-        }
-        
+
         private void PlaceCitiesAndInitialBiomes(IPlayerData[] players)
         {
             var seedX = Random.Range(0f, 100f);
