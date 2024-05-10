@@ -88,7 +88,6 @@ namespace Core
             }
         }
 
-        [Obsolete]
         private void InitializeGame()
         {
             InitPlayers();

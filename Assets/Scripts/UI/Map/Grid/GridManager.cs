@@ -112,6 +112,11 @@ namespace UI.Map.Grid
             spawnedTile.GetComponent<HexManager>().Init(data, spawnedTile, _settingsManager);
             _hexes[cords] = spawnedTile;
         }
+
+        public void ReinitHexAtCords(Vector2 cords)
+        {
+            _hexes[cords].GetComponent<HexManager>().Reinit();
+        }
         public void InitUnitAtCords(Vector2 cords, IUnitData data)
         {
             // var spawnedUnit = Instantiate(unitPrefabByType[(int)data.UnitType], TransformCords(cords),

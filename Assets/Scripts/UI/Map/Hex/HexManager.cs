@@ -66,6 +66,12 @@ namespace UI.Map.Hex
             _lowerSprite.sprite = GetLower();
         }
 
+        public void Reinit()
+        {
+            _upperSprite.sprite = GetUpper();
+            _lowerSprite.sprite = GetLower();
+        }
+
         private void OnMouseUpAsButton()
         {
             onHexClicked.Invoke(_data);
