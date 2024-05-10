@@ -36,6 +36,10 @@ namespace UI.Map.Hex
 
         private Sprite GetUpper()
         {
+            if (_data.City != null)
+            {
+                return _settingsManager.GetHexCitySprites(_data.Terrain);
+            }
             if (_data.Resource != null)
             {
                 if (_data.Resource.Level > 0)

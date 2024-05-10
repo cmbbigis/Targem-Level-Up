@@ -1,4 +1,5 @@
 ﻿using Map.Models.Hex;
+using Players.Models.Player;
 using UnityEngine;
 
 namespace Map.Models.Map
@@ -8,6 +9,6 @@ namespace Map.Models.Map
         int Width { get; }
         int Height { get; }
         IHexData GetHexagonAt(Vector2 cords);
-        void MakeMap();
+        void MakeMap(IPlayerData[] players);
     }
 }

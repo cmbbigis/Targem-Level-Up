@@ -1,30 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cities.Models.City;
+using Fraction;
+using Fraction.Fractions;
 using Map;
 using Map.Models.Hex;
 using Map.Models.Terrain;
 using Players.Models.Player;
+using Resources.Models.Resource;
 using Units.Models.Unit;
 using Units.Models.Unit.Units;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Core
 {
     public class GameManager : MonoBehaviour
     {
         [SerializeField] private GameObject mapManagerObject;
-        private MapManager _mapManager;
+        private MapManager mapManager;
+        
+        [FormerlySerializedAs("gameSettingsManager")]
+        [SerializeField] private GameObject gameSettingsManagerObject;
+        private GameSettingsManager gameSettingsManager;
 
-        public Player[] Players;
-        private int _currentPlayerIndex;
+        private Player[] players;
+        private int currentPlayerIndex;
 
-        public Player CurrentPlayer => Players[_currentPlayerIndex];
-        public PlayerData CurrentPlayerData => Players[_currentPlayerIndex].Data;
+        private Player CurrentPlayer => players[currentPlayerIndex];
+        private PlayerData CurrentPlayerData => players[currentPlayerIndex].Data;
 
         void Start()
         {
-            _mapManager = mapManagerObject.GetComponent<MapManager>();
+            mapManager = mapManagerObject.GetComponent<MapManager>();
+            gameSettingsManager = gameSettingsManagerObject.GetComponent<GameSettingsManager>();
             InitializeGame();
             StartTurn();
             
@@ -35,38 +45,56 @@ namespace Core
             return CurrentPlayerData.Units.Any(x => x.CanMove());
         }
 
+        private FractionData GetFractionByType(FractionType type)
+        {
+            switch (type)
+            {
+                case FractionType.Forest:
+                    return new ForestFaction{TerrainType = TerrainType.Forest};
+                case FractionType.Mountain:
+                    return new MountainFaction{TerrainType = TerrainType.Mountain};
+                default:
+                    return new FractionData("", "", Color.white, 0, 0, 0);
+            }
+        }
+        
+        private void InitPlayers()
+        {
+            players = new Player[gameSettingsManager.playersCount];
+
+            for (var i = 0; i < gameSettingsManager.playersCount; i++)
+            {
+                var playerData = new PlayerData
+                {
+                    Name = gameSettingsManager.playerNames[i],
+                    FractionData = GetFractionByType(gameSettingsManager.playerFractions[i]),
+                    Units = new HashSet<IUnitData>(),
+                    Cities = new HashSet<ICityData>(),
+                    Resources = new Dictionary<ResourceType, float>(),
+                };
+                var turnState = new PlayerTurnState();
+                
+                players[i] = new Player{Data = playerData, TurnState = turnState};
+            }
+        }
+
+        private void EnrichPlayers()
+        {
+            foreach (var p in players)
+            {
+                var unit = new Infantry(p.Data);
+                p.Data.AddUnit(unit);
+                mapManager.PlaceUnitRandomly(unit);
+            }
+        }
+
         [Obsolete]
         private void InitializeGame()
         {
-            _mapManager.Init();
-            Players = new Player[2];
-            var playerA = Players[0] = new Player
-            {
-                Data = new PlayerData
-                {
-                    Name = "A",
-                    Units = new List<IUnitData>()
-                },
-                TurnState = new PlayerTurnState()
-            };
-            var unitA = new Infantry(playerA.Data);
-            playerA.Data.AddUnit(unitA);
-            _mapManager.PlaceUnitRandomly(unitA);
-
-            var playerB = Players[1] = new Player
-            {
-                Data = new PlayerData
-                {
-                    Name = "B",
-                    Units = new List<IUnitData>()
-                },
-                TurnState = new PlayerTurnState()
-            };
-            var unitB = new Infantry(playerB.Data);
-            playerB.Data.AddUnit(unitB);
-            _mapManager.PlaceUnitRandomly(unitB);
-            
-            _currentPlayerIndex = 0;
+            InitPlayers();
+            mapManager.Init(players.Select(x => x.Data).ToArray());
+            EnrichPlayers();
+            currentPlayerIndex = 0;
         }
 
         private void Update()
@@ -78,11 +106,11 @@ namespace Core
                 
             }
         }
-        
-        public void EndTurn()
+
+        private void EndTurn()
         {
             CurrentPlayer.TurnState.EndTurn();
-            _currentPlayerIndex = (_currentPlayerIndex + 1) % Players.Length;
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.Length;
             StartTurn();
         }
 
@@ -94,16 +122,16 @@ namespace Core
             var current = CurrentPlayer.TurnState.GetCurrent();
             if (current != null)
             {
-                _mapManager.FocusOnEntity(current);
+                mapManager.FocusOnEntity(current);
                 if (current is IUnitData unit)
                     ShowUnitPaths(unit);
             }
-            Debug.Log($"Player {_currentPlayerIndex + 1} turns");
+            Debug.Log($"Player {currentPlayerIndex + 1} turns");
         }
 
-        public void ShowUnitPaths(IUnitData unit)
+        private void ShowUnitPaths(IUnitData unit)
         {
-            CurrentPlayer.TurnState.SetHighlightedEntities(_mapManager.FindPossibleHexes(unit));
+            CurrentPlayer.TurnState.SetHighlightedEntities(mapManager.FindPossibleHexes(unit));
         }
         
         public void HandleUnitClicked(IUnitData unit)
@@ -129,14 +157,14 @@ namespace Core
         {
             if (CurrentPlayer.TurnState.GetCurrent() is IUnitData unit && CurrentPlayerData.Units.Contains(unit))
             {
-                if (_mapManager.MoveUnitTo(unit, hex))
+                if (mapManager.MoveUnitTo(unit, hex))
                 {
                     ShowUnitPaths(unit);
                 }
             }
             else
             {
-                _mapManager.FocusOnHex(hex);
+                mapManager.FocusOnHex(hex);
                 if (CurrentPlayer.TurnState.ChosenEntities.Contains(hex))
                     CurrentPlayer.TurnState.SetChosenEntity(hex);
                 else    
@@ -146,12 +174,12 @@ namespace Core
 
         public void MoveCamera(Vector3 diff)
         {
-            _mapManager.MoveCamera(diff);
+            mapManager.MoveCamera(diff);
         }
         
         public void ZoomCamera(float scroll)
         {
-            _mapManager.ZoomCamera(scroll);
+            mapManager.ZoomCamera(scroll);
         }
     }
 }

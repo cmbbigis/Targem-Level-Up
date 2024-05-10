@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cities.Models.City;
 using Core;
 using Map.Models.Hex;
 using Map.Models.Map;
 using Map.Models.Terrain;
+using Players.Models.Player;
+using Resources.Models.Resource;
 using UI.Map.Grid;
 using Units.Models.Unit;
 using UnityEngine;
@@ -14,24 +17,33 @@ namespace Map
 {
     public class MapManager: MonoBehaviour, IMapData
     {
-        [SerializeField] private int width, height;
-        public int Width => width;
-        public int Height => height;
+        public int Width { get; set; }
+
+        public int Height { get; set; }
+
         private readonly Dictionary<Vector2, IHexData> _hexes = new();
         
         [SerializeField] private GameObject gridManagerObject;
         private GridManager _gridManager;
+        
+        [SerializeField] private GameObject gameSettingsManager;
+        private GameSettingsManager _gameSettingsManager;
+        
         private readonly System.Random _rand = new();
         
         private void Awake()
         {
             _gridManager = gridManagerObject.GetComponent<GridManager>();
+            _gameSettingsManager = gameSettingsManager.GetComponent<GameSettingsManager>();
+
+            Width = _gameSettingsManager.mapWidth;
+            Height = _gameSettingsManager.mapHeight;
         }
 
-        public void Init()
+        public void Init(PlayerData[] players)
         {
-            _gridManager.Init(width, height);
-            MakeMap();
+            _gridManager.Init(Width, Height);
+            MakeMap(players);
             _gridManager.PostInit();
         }
         
@@ -63,17 +75,18 @@ namespace Map
         }
 
         // MAP
-        public void MakeMap() =>
-            GenerateMap();
-        public IHexData GetHexagonAt(Vector2 cords) => _hexes[cords];
+        public void MakeMap(IPlayerData[] players) =>
+            GenerateMap(players);
+        public IHexData GetHexagonAt(Vector2 cords) => _hexes.TryGetValue(cords, out var hex) ? hex : null;
+
         public IHexData GetHexagonAt(int x, int y) => GetHexagonAt(new Vector2(x, y));
         public IHexData SetHexagonAt(Vector2 cords, IHexData hex) => _hexes[cords] = hex;
         public IHexData SetHexagonAt(int x, int y, IHexData hex) => SetHexagonAt(new Vector2(x, y), hex);
         private void MakeSimpleRandomMap()
         {
-            for (var y = 0; y < height; y++)
+            for (var y = 0; y < Height; y++)
             {
-                for (var x = 0; x < width; x++)
+                for (var x = 0; x < Width; x++)
                 {
                     var data = new HexData(x, y, (TerrainType) _rand.Next(0, 3));
                     InitHexAt(data, new Vector2(x, y));
@@ -81,36 +94,123 @@ namespace Map
             }
             FillEmpty();
         }
-        public void GenerateMap()
+
+        public void GenerateMap(IPlayerData[] players)
         {
             var seedX = Random.Range(0f, 100f);
             var seedY = Random.Range(0f, 100f);
-
-            // Генерация шума Перлина
-            for (var x = 0; x < Width; x++)
+            
+            PlaceCitiesAndInitialBiomes(players);
+            
+            for (int x = 0; x < Width; x++)
             {
-                for (var y = 0; y < Height; y++)
+                for (int y = 0; y < Height; y++)
                 {
-                    var noise = Mathf.PerlinNoise((x + seedX) * 0.1f, (y + seedY) * 0.1f);
-                    var (terrain, z) = DetermineTerrainByNoise(noise);
-                    InitHexAt(new HexData(x, y, terrain, z), new Vector2(x, y));
+                    if (GetHexagonAt(x, y) == null)
+                    {
+                        var noise = Mathf.PerlinNoise((x + seedX) * 0.1f, (y + seedY) * 0.1f);
+                        var (terrain, z) = DetermineTerrainByNoise(noise);
+                        InitHexAt(new HexData(x, y, terrain, z), new Vector2(x, y));
+                    }
                 }
             }
-
-            // Распределение ресурсов и размещение городов
-            PlaceResourcesAndCities();
         }
-
+        
         private (TerrainType, float) DetermineTerrainByNoise(float noiseValue)
         {
+            var noise = noiseValue >= 0.999f ? 0.99f : noiseValue;
+            var noiseVal = noise * 100;
             var types = Enum.GetValues(typeof(TerrainType)).Cast<TerrainType>().ToArray();
-            var idx = (int) Math.Floor(noiseValue * types.Length);
-            return (types[idx], noiseValue * types.Length - idx);
+            var totalWeights = _gameSettingsManager.biomeWeights.Values.Sum();
+            var leftSum = 1;
+            
+            for (var i = types.Length; i > 0; i--)
+            {
+                var type = types[i];
+                var weight = _gameSettingsManager.biomeWeights[type] / totalWeights;
+                leftSum -= weight;
+                if (noiseVal > leftSum)
+                    return (type, noiseVal - leftSum);
+            }
+
+            return (types[0], noiseVal);
+            
+            var idx = (int) Math.Floor(noiseVal * types.Length);
+            return (types[idx], noiseVal * types.Length - idx);
+        }
+        
+        private TerrainType GetRandomBiomeByWeight()
+        {
+            var totalWeight = _gameSettingsManager.biomeWeights.Values.Sum();
+            var choice = Random.Range(0, totalWeight);
+            foreach (var biome in _gameSettingsManager.biomeWeights)
+            {
+                if (choice < biome.Value)
+                    return biome.Key;
+                choice -= biome.Value;
+            }
+            return TerrainType.Plains; // Fallback
+        }
+        
+        private void PlaceCitiesAndInitialBiomes(IPlayerData[] players)
+        {
+            var seedX = Random.Range(0f, 100f);
+            var seedY = Random.Range(0f, 100f);
+            
+            for (var i = 0; i < _gameSettingsManager.playersCount; i++)
+            {
+                // Расположение города
+                var cityLocation = PlaceCity();
+                var preferredTerrain = players[i].FractionData.TerrainType;
+                var cityData = new HexData((int)cityLocation.x, (int)cityLocation.y, preferredTerrain)
+                {
+                    City = new CityData()
+                };
+                InitHexAt(cityData, cityLocation);
+
+                // Создание стартового биома вокруг города
+                for (var dx = -3; dx <= 3; dx++)
+                {
+                    for (var dy = -3; dy <= 3; dy++)
+                    {
+                        var nx = (int)cityLocation.x + dx;
+                        var ny = (int)cityLocation.y + dy;
+                        if (nx >= 0 && nx < Width && ny >= 0 && ny < Height)
+                        {
+                            var noise = Mathf.PerlinNoise((nx + seedX), (ny + seedY));
+                            var data = new HexData(nx, ny, preferredTerrain, noise)
+                            {
+                            };
+                            InitHexAt(data, new Vector2(nx, ny));
+                        }
+                    }
+                }
+            }
         }
 
-        private void PlaceResourcesAndCities()
+        private readonly List<Vector2> placedCities = new ();
+        private Vector2 PlaceCity()
         {
-            // Реализуйте логику размещения ресурсов и городов
+            const int attempts = 10; // Количество попыток найти оптимальное место
+            var bestPosition = new Vector2();
+            float bestDistance = 0;
+
+            for (var i = 0; i < attempts; i++)
+            {
+                var candidatePosition = new Vector2(Random.Range(0, Width), Random.Range(0, Height));
+                var minDistance = placedCities.Select(city => Vector2.Distance(candidatePosition, city)).Prepend(float.MaxValue).Min();
+
+                if (!(minDistance > bestDistance))
+                {
+                    continue;
+                }
+
+                bestDistance = minDistance;
+                bestPosition = candidatePosition;
+            }
+
+            placedCities.Add(bestPosition);
+            return bestPosition;
         }
 
         private void FillEmpty()
@@ -143,17 +243,17 @@ namespace Map
         [Obsolete]
         public void PlaceUnitRandomly(IUnitData unitData)
         {
-            var cords = new Vector2(_rand.Next(0, width), _rand.Next(0, height));
+            var cords = new Vector2(_rand.Next(0, Width), _rand.Next(0, Height));
             var f = InitUnitAt(unitData, cords);
             while (!f)
             {
-                cords = new Vector2(_rand.Next(0, width), _rand.Next(0, height));
+                cords = new Vector2(_rand.Next(0, Width), _rand.Next(0, Height));
                 f = InitUnitAt(unitData, cords);
             }
         }
         
         // PATHFINDING
-        private bool IsCordsValid(Vector2 cords) => 0 <= cords.x && cords.x < width && 0 <= cords.y && cords.y < height;
+        private bool IsCordsValid(Vector2 cords) => 0 <= cords.x && cords.x < Width && 0 <= cords.y && cords.y < Height;
         private List<IHexData> GetNeighbours(IHexData hex)
         {
             var possibleNeighbours = new Vector2[]

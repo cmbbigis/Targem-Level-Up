@@ -152,9 +152,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 399b2f19c4ed4b419791398bd2512afd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 25
-  height: 25
   gridManagerObject: {fileID: 1049318601}
+  gameSettingsManager: {fileID: 2134040074}
 --- !u!4 &16685533
 Transform:
   m_ObjectHideFlags: 0
@@ -323,6 +322,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapManagerObject: {fileID: 16685531}
+  gameSettingsManager: {fileID: 2134040074}
 --- !u!4 &1073819326
 Transform:
   m_ObjectHideFlags: 0
@@ -537,6 +537,60 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2134040074
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2134040076}
+  - component: {fileID: 2134040075}
+  m_Layer: 0
+  m_Name: GameSettingsManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2134040075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2134040074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbb5f5fb33364060b05199c5ea41dac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playersCount: 3
+  mapWidth: 20
+  mapHeight: 20
+  playerFractions: 000000000100000000000000
+  playerNames:
+  - A
+  - B
+  - C
+  biomeWeights:
+    _serializedList: []
+--- !u!4 &2134040076
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2134040074}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.0018071998, y: -0.027745381, z: 0.049198635}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1083422796344717960
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -688,6 +742,12 @@ MonoBehaviour:
       Value: {fileID: 21300000, guid: 5c04150377fd6f64ba38caf74635a26f, type: 3}
     - Key: 7
       Value: {fileID: 21300000, guid: 50823798685c4064c849c596a47b8173, type: 3}
+  hexCitySprites:
+    _serializedList:
+    - Key: 0
+      Value: {fileID: 21300000, guid: 53963a47d32ddd74abbef6917e7dd4f7, type: 3}
+    - Key: 2
+      Value: {fileID: 21300000, guid: 756c1f335d6d49d4294ffdae4b256918, type: 3}
   resourceHexSprites:
     _serializedList:
     - Key: 0
@@ -771,3 +831,4 @@ SceneRoots:
   - {fileID: 1380987411}
   - {fileID: 1754482150}
   - {fileID: 3595789438959913324}
+  - {fileID: 2134040076}

@@ -27,6 +27,9 @@ namespace Core
         [SerializedDictionary("TerrainType", "Sprite")]
         public SerializedDictionary<TerrainType, Sprite> hexUnderSprites;
         
+        [SerializedDictionary("TerrainType", "Sprite")]
+        public SerializedDictionary<TerrainType, Sprite> hexCitySprites;
+        
         [SerializedDictionary("TerrainType", "Sprites")]
         public SerializedDictionary<TerrainType, SerializedDictionary<ResourceType, Sprite[]>> resourceHexSprites;
             
@@ -36,6 +39,7 @@ namespace Core
         public GameObject GetUnitPrefab(UnitType type) => unitPrefabByUnitType[type];
         public float GetHewMovementWeight(UnitType unitType, TerrainType terrainType) => hexMovementWeights[unitType][terrainType];
         public Sprite[] GetHexSprites(TerrainType terrainType) => hexSprites[terrainType];
+        public Sprite GetHexCitySprites(TerrainType terrainType) => hexCitySprites[terrainType];
         public Sprite GetHexUnderSprites(TerrainType terrainType) => hexUnderSprites[terrainType];
         public Sprite[] GetResourceHexSprites(TerrainType terrainType, ResourceType resourceType) =>
             resourceHexSprites[terrainType][resourceType];
