@@ -13,12 +13,15 @@ namespace UI
     {
         [SerializeField] private GameObject gameManagerObject;
         private GameManager _gameManager;
+        [SerializeField] private GameObject gameUIObject;
+        private GameUI _gameUI;
         private readonly List<HexManager> _hexManagers = new();
         private readonly List<UnitManager> _unitManagers = new();
 
         private void Start()
         {
             _gameManager = gameManagerObject.GetComponent<GameManager>();
+            _gameUI = gameUIObject.GetComponent<GameUI>();
         }
         
         void OnEnable() {
@@ -54,10 +57,19 @@ namespace UI
             _unitManagers.Remove(manager);
             manager.onUnitClicked.RemoveListener(HandleUnitClicked);
         }
+
+        public void HandleEndTurnClicked() =>
+            _gameManager.EndTurn();
         
-        private void HandleUnitClicked(IUnitData unit)
+        public void HandleAttackDropdownClicked(int idx) 
+        {
+            
+        }
+        
+        private void HandleUnitClicked(IUnitData unit, GameObject obj)
         {
             _gameManager.HandleUnitClicked(unit);
+            _gameUI.HandleUnitChosen(unit, obj.GetComponentsInChildren<SpriteRenderer>()[0]);
         }
 
         private void HandleHexClicked(IHexData hex)

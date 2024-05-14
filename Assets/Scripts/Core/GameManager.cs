@@ -106,7 +106,7 @@ namespace Core
             }
         }
 
-        private void EndTurn()
+        public void EndTurn()
         {
             CurrentPlayer.TurnState.EndTurn();
             currentPlayerIndex = (currentPlayerIndex + 1) % players.Length;
@@ -131,6 +131,11 @@ namespace Core
         private void ShowUnitPaths(IUnitData unit)
         {
             CurrentPlayer.TurnState.SetHighlightedEntities(mapManager.FindPossibleHexes(unit));
+        }
+        
+        private void ShowUnitTargets(IUnitData unit)
+        {
+            // CurrentPlayer.TurnState.SetHighlightedEntities(mapManager.FindPossibleAttackTargets(unit, ));
         }
         
         public void HandleUnitClicked(IUnitData unit)

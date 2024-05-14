@@ -15,5 +15,8 @@ namespace Resources.Models.Resource
         {
             throw new System.NotImplementedException();
         }
+
+        public bool IsChosen { get; set; }
+        public bool IsHighlighted { get; set; }
     }
 }

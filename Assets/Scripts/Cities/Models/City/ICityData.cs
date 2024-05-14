@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using Cities.Models.Buildings;
+using Core;
 
 namespace Cities.Models.City
 {
-    public interface ICityData
+    public interface ICityData: IEntity
     {
         string Name { get; set; }
         int HealthPoints { get; set; }

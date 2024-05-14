@@ -15,7 +15,7 @@ namespace UI.Map.Unit
         private GameObject _obj;
         private SpriteRenderer _character;
         private SpriteRenderer _characterShadow;
-        public UnityEvent<IUnitData> onUnitClicked;
+        public UnityEvent<IUnitData, GameObject> onUnitClicked;
         private static readonly int OutlineEnabled = Shader.PropertyToID("_OutlineEnabled");
         public static event Action<UnitManager> OnUnitManagerCreated;
         public static event Action<UnitManager> OnUnitManagerDestroyed;
@@ -23,7 +23,7 @@ namespace UI.Map.Unit
 
         
         void Awake() {
-            onUnitClicked = new UnityEvent<IUnitData>();
+            onUnitClicked = new UnityEvent<IUnitData, GameObject>();
             OnUnitManagerCreated?.Invoke(this);
         }
 
@@ -44,7 +44,7 @@ namespace UI.Map.Unit
 
         private void OnMouseUpAsButton()
         {
-            onUnitClicked.Invoke(_data);
+            onUnitClicked.Invoke(_data, _obj);
         }
 
         private void Update()

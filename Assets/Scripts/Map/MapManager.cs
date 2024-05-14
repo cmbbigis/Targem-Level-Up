@@ -11,6 +11,7 @@ using Resources.Models.Resource;
 using UI.Map.Grid;
 using Units.Models.Unit;
 using UnityEngine;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 namespace Map
@@ -55,26 +56,28 @@ namespace Map
                 _gridManager.MoveUnitTo(h.Unit, h.Cords);
         }
 
-        // CAMERA
-            public void MoveCamera(Vector3 diff) =>
-                _gridManager.MoveCamera(diff);
-            public void ZoomCamera(float diff) =>
-                _gridManager.ZoomOn(diff);
-            public void FocusOnUnit(IUnitData unit)
-            {
-                _gridManager.CenterCamOnUnit(unit);
-            }
-            public void FocusOnHex(IHexData hex) =>
-                _gridManager.CenterCamOnHex(hex);
-            public void FocusOnEntity(IEntity entity)
-            {
-                if (entity is IUnitData unit)
-                    FocusOnUnit(unit);
-                else if (entity is IHexData hex)
-                    FocusOnHex(hex);
-            }
+        #region CAMERA
+        public void MoveCamera(Vector3 diff) =>
+            _gridManager.MoveCamera(diff);
+        public void ZoomCamera(float diff) =>
+            _gridManager.ZoomOn(diff);
+        public void FocusOnUnit(IUnitData unit)
+        {
+            _gridManager.CenterCamOnUnit(unit);
+        }
+        public void FocusOnHex(IHexData hex) =>
+            _gridManager.CenterCamOnHex(hex);
+        public void FocusOnEntity(IEntity entity)
+        {
+            if (entity is IUnitData unit)
+                FocusOnUnit(unit);
+            else if (entity is IHexData hex)
+                FocusOnHex(hex);
+        }
+        #endregion
+        
+        #region MAP
 
-        // MAP
         public void MakeMap(IPlayerData[] players) =>
             GenerateMap(players);
         public IHexData GetHexagonAt(Vector2 cords) => _hexes.TryGetValue(cords, out var hex) ? hex : null;
@@ -157,7 +160,6 @@ namespace Map
                 }
             }
         }
-
         
         private (TerrainType, float) DetermineTerrainByNoise(float noiseValue)
         {
@@ -266,7 +268,9 @@ namespace Map
             }
         }
         
-        // PATHFINDING
+        #endregion
+
+        #region PATHFINDING
         private bool IsCordsValid(Vector2 cords) => 0 <= cords.x && cords.x < Width && 0 <= cords.y && cords.y < Height;
         private List<IHexData> GetNeighbours(IHexData hex)
         {
@@ -280,6 +284,31 @@ namespace Map
         private float GetHexCapacity(IHexData hex)
         {
             throw new NotImplementedException();
+        }
+        
+        public List<IHexData> GetHexesWithinDistance(IHexData start, float n)
+        {
+            var result = new List<IHexData>();
+            var queue = new Queue<IHexData>();
+            var visited = new Dictionary<IHexData, bool>();
+
+            queue.Enqueue(start);
+            visited[start] = true;
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                result.Add(current);
+
+                foreach (var neighbor in GetNeighbours(current)
+                             .Where(neighbor => !visited.ContainsKey(neighbor) && Vector3.Distance(neighbor.Cords, start.Cords) <= n))
+                {
+                    visited[neighbor] = true;
+                    queue.Enqueue(neighbor);
+                }
+            }
+
+            return result;
         }
 
         public Dictionary<IHexData, UnitPath> FindUnitPaths(IUnitData unit, float maxDistance)
@@ -340,6 +369,16 @@ namespace Map
         }
         public IEnumerable<IHexData> FindPossibleHexes(IUnitData unit) =>
             FindUnitPaths(unit, unit.MovementInfo.MovesLeft).Keys;
+        public IEnumerable<IEntity> FindPossibleAttackTargets(IUnitData unit, Attack attack)
+        {
+            return GetHexesWithinDistance(unit.Hex, attack.Range)
+                   .Where(x => x.Unit != null || x.City != null || x.Resource.Level > 0)
+                   .Select(x => x.Unit != null
+                               ? (IEntity) x.Unit
+                               : x.City != null
+                                   ? x.City
+                                   : x.Resource);
+        }
         public List<ResourcePath> FindResourcePaths(IHexData source, IHexData destination, int maxPaths)
         {
             var paths = new List<ResourcePath>();
@@ -378,8 +417,9 @@ namespace Map
 
             return paths;
         }
+        #endregion
         
-        //UNITS
+        #region UNITS
         public bool PlaceUnitAt(IUnitData unit, IHexData hex)
         {
             if (!unit.CanStayOn(hex))
@@ -402,6 +442,11 @@ namespace Map
                 return false;
             return unit.MoveTo(hex, path.TotalDistance);
         }
+
+        public bool UnitCanHarvest(IUnitData unit)
+            => unit.Hex.Resource != null && unit.BuildingPower > 0;
+
+        #endregion
     }
     
     public class ResourcePath

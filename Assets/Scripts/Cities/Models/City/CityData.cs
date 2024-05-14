@@ -20,5 +20,8 @@ namespace Cities.Models.City
 
         public IEnumerable<IBuilding> GetBuildings()
             => throw new System.NotImplementedException();
+
+        public bool IsChosen { get; set; }
+        public bool IsHighlighted { get; set; }
     }
 }
