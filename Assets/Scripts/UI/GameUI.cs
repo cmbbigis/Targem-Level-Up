@@ -33,7 +33,13 @@ namespace UI
                         private Button unitBuildButton;
                         private TMP_Text unitBuildData;
             private GameObject resourcePanel;
+                private Image resourceSprite;
+                private TMP_Text resourceData;
             private GameObject cityPanel;
+                private Image citySprite;
+                private TMP_Text cityData;
+            private GameObject playerPanel;
+                private TMP_Text playerData;
 
         private GameObject[] unitMenus;
 
@@ -61,7 +67,13 @@ namespace UI
                             unitBuildButton = GameObject.Find("UnitBuildButton").GetComponent<Button>();
                             unitBuildData = GameObject.Find("UnitBuildData").GetComponent<TMP_Text>();
                 resourcePanel = GameObject.Find("ResourcePanel");
+                    resourceSprite = GameObject.Find("ResourceSprite").GetComponent<Image>();
+                    resourceData = GameObject.Find("ResourceData").GetComponent<TMP_Text>();
                 cityPanel = GameObject.Find("CityPanel");
+                    citySprite = GameObject.Find("CitySprite").GetComponent<Image>();
+                    cityData = GameObject.Find("CityData").GetComponent<TMP_Text>();
+                playerPanel = GameObject.Find("PlayerPanel");
+                    playerData = GameObject.Find("PlayerData").GetComponent<TMP_Text>();
 
                 unitMenus = new[] {unitMoveMenu, unitAttackMenu, unitBuildMenu};
                 
