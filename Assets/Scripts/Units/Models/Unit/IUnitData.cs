@@ -14,7 +14,7 @@ namespace Units.Models.Unit
         Building = 2
     }
     
-    public interface IUnitData: IEntity
+    public interface IUnitData: IAttackable
     {
         GameObject Object { get; set; }
         Sprite Sprite { get; }
@@ -26,7 +26,6 @@ namespace Units.Models.Unit
         UnitType UnitType { get; }
         
         // MOVEMENT
-        IHexData Hex { get; set; }
         float MovementRange { get; }
         Dictionary<TerrainType, float> MovementCosts { get; set; }
         HashSet<TerrainType> AllowedTerrainTypes { get; }
@@ -39,14 +38,14 @@ namespace Units.Models.Unit
         Attack CurrentAttack { get; set; }
 
         // ATTACKING
-        float HealthPoints { get; set; }
+        float StartHealthPoints { get; set; }
         float Defense { get; set; }
         List<Attack> Attacks { get; set; }
         bool IsAlive { get; }
-        bool CanAttack(Attack attack, IUnitData target);
-        bool Attack(Attack attack, IUnitData target);
+        bool CanAttack(Attack attack, IAttackable target);
+        bool Attack(Attack attack, IAttackable target);
         void Die();
-        float CalculateDamage(Attack attack, IUnitData attacker, IUnitData defender);
+        float CalculateDamage(Attack attack, IUnitData attacker, IAttackable defender);
         float GetSpecialAbilitiesModifier() => 1.0f;
         float GetDefensiveAbilitiesModifier() => 1.0f;
         float GetTerrainModifier(TerrainType attackerTerrain, TerrainType defenderTerrain);

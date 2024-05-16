@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Cities.Models.City;
+using Core;
+using JetBrains.Annotations;
 using Map.Models.InteractiveObjects;
 using Map.Models.Terrain;
 using Resources;
@@ -31,6 +33,16 @@ namespace Map.Models.Hex
         public IUnitData Unit { get; set; }
         public IResourceData Resource { get; set; }
         public IInteractiveObject InteractiveObject { get; set; }
+        public IAttackable GetAttackTarget()
+        {
+            if (Unit != null)
+                return Unit;
+            if (City != null)
+                return City;
+            if (Resource is {Level: > 0})
+                return Resource;
+            return null;
+        }
 
         // HIGHLIGHTING
         public bool IsChosen { get; set; }

@@ -1,12 +1,23 @@
 ﻿using System.Collections.Generic;
 using Cities.Models.Buildings;
+using Map.Models.Hex;
 
 namespace Cities.Models.City
 {
     public class CityData: ICityData
     {
         public string Name { get; set; }
-        public int HealthPoints { get; set; }
+        public IHexData Hex { get; set; }
+        public float HealthPoints { get; set; }
+        public float Defense { get; set; }
+        public float GetDefensiveAbilitiesModifier()
+            => 1;
+
+        public void Die()
+        {
+            throw new System.NotImplementedException();
+        }
+
         public int ConstructionSlots { get; set; }
         public void AddBuilding(IBuilding building)
         {

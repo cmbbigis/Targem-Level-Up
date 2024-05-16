@@ -2,6 +2,7 @@
 using System.Linq;
 using Common;
 using Core;
+using TMPro;
 using UI.Map.Hex;
 using Units.Models.Unit;
 using UnityEngine;
@@ -13,6 +14,7 @@ namespace UI.Map.Unit
     {
         private IUnitData _data;
         private GameObject _obj;
+        private TMP_Text _textData;
         private SpriteRenderer _character;
         private SpriteRenderer _characterShadow;
         public UnityEvent<IUnitData> onUnitClicked;
@@ -39,6 +41,7 @@ namespace UI.Map.Unit
             _settingsManager = settingsManager;
             _data.MovementCosts = _settingsManager.hexMovementWeights[_data.UnitType].ToDictionary();
             
+            _textData = _obj.GetComponentInChildren<TMP_Text>();
             var sprites = _obj.GetComponentsInChildren<SpriteRenderer>();
             (_character, _characterShadow) = (sprites[0], sprites[1]);
         }
@@ -50,10 +53,18 @@ namespace UI.Map.Unit
 
         private void Update()
         {
+            if (_data.HealthPoints <= 0.0001)
+            {
+                _obj.SetActive(false);
+                enabled = false;
+            }
+            
             if (Math.Abs((_data.IsChosen || _data.IsHighlighted ? 1 : 0) - _character.material.GetFloat(OutlineEnabled)) > 0.00001)
             {
                 _character.material.SetFloat(OutlineEnabled, _data.IsChosen || _data.IsHighlighted ? 1 : 0);
             }
+
+            _textData.SetText($"{_data.UnitType}\n{_data.HealthPoints}/{_data.StartHealthPoints}");
         }
     }
 }

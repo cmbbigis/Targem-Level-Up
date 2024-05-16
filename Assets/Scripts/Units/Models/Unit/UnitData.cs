@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cities.Models.City;
 using Core;
 using Map.Models.Hex;
 using Map.Models.Terrain;
 using Players.Models.Player;
+using Resources.Models.Resource;
 using UnityEditor.UI;
 using UnityEngine;
 
@@ -22,6 +24,7 @@ namespace Units.Models.Unit
         public AttackType Type { get; set; }
         public float Power { get; set; }
         public float Range { get; set; }
+        public float Volume { get; set; }
     }
 
     public class UnitData : IUnitData
@@ -30,6 +33,7 @@ namespace Units.Models.Unit
         {
             Master = master;
             UnitType = unitType;
+            StartHealthPoints = healthPoints;
             HealthPoints = healthPoints;
             Defense = defense;
             MovementRange = movementRange;
@@ -82,25 +86,43 @@ namespace Units.Models.Unit
         public Attack CurrentAttack { get; set; }
 
         // ATTACKING
+        public float StartHealthPoints { get; set; }
         public float HealthPoints { get; set; }
         public float Defense { get; set; }
         public List<Attack> Attacks { get; set; }
         public bool IsAlive => HealthPoints > 0.001;
-        public bool CanAttack(Attack attack, IUnitData target)
+        public bool CanAttack(Attack attack, IAttackable target)
         {
+            // if (target is IResourceData resourceData)
+                // Debug.Log(resourceData.Type);
+            // else if (target is ICityData cityData)
+                // Debug.Log(cityData.Name);
+            // else
+            // {
+                // Debug.Log(target);
+            // }
+                
             var distance = Vector3.Distance(Hex.Cords, target.Hex.Cords);
-            return (attack.Type == AttackType.Ranged && distance <= attack.Range) || (attack.Type == AttackType.Melee && distance <= attack.Range);
+            return target != this &&  MovementInfo.MovesLeft >= attack.Volume && distance <= attack.Range;
         }
-        public bool Attack(Attack attack, IUnitData target)
+        public bool Attack(Attack attack, IAttackable target)
         {
+            if (!CanAttack(attack, target))
+                return false;
             var damage = CalculateDamage(attack, this, target);
             target.HealthPoints -= damage;
             if (target.HealthPoints <= 0)
                 target.Die();
+            MovementInfo.MovesLeft -= attack.Volume;
             return true;
         }
-        public void Die() => HealthPoints = 0;
-        public float CalculateDamage(Attack attack, IUnitData attacker, IUnitData defender)
+        public void Die()
+        {
+            HealthPoints = 0;
+            Master.Units.Remove(this);
+        }
+
+        public float CalculateDamage(Attack attack, IUnitData attacker, IAttackable defender)
         {
             var baseDamage = attack.Power;
             var effectiveDamage = baseDamage - defender.Defense;
