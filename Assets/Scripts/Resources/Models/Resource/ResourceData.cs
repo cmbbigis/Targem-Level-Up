@@ -1,3 +1,5 @@
+using System;
+using Cities.Models.City;
 using Map.Models.Hex;
 
 namespace Resources.Models.Resource
@@ -5,9 +7,10 @@ namespace Resources.Models.Resource
     public class ResourceData: IResourceData
     {
         public ResourceType Type { get; set; }
+        public ICityData ConnectedCity { get; set; }
         public int Quantity { get; set; }
-        public int Level { get; set; }
-
+        public float Level { get; set; }
+        public int IntLevel => (int) Math.Floor(Level);
         public void Harvest()
         {
             Level = 1;

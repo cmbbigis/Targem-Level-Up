@@ -18,7 +18,7 @@ namespace Units.Models.Unit.Units
                 }, 
                 3,
                 new HashSet<TerrainType> {TerrainType.Desert, TerrainType.Dirt, TerrainType.Forest, TerrainType.Mountain, TerrainType.Plains, TerrainType.Snow, TerrainType.Swamp},
-                10
+                2
                 )
         {
         }

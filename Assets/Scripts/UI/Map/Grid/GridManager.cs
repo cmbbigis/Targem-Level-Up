@@ -71,7 +71,7 @@ namespace UI.Map.Grid
         public void PostInit()
         {
             // FillEmpty();
-            CenterCam();
+            // CenterCam();
         }
         
         // MAP

@@ -22,12 +22,12 @@ namespace Core
     {
         [SerializeField] private GameObject mapManagerObject;
         private MapManager mapManager;
-        
+
         [SerializeField] private GameObject gameSettingsManagerObject;
         private GameSettingsManager gameSettingsManager;
-        
+
         [SerializeField] private GameObject gameUIObject;
-        private GameUI gameUI;        
+        private GameUI gameUI;
 
         private Player[] players;
         private int currentPlayerIndex;
@@ -42,7 +42,6 @@ namespace Core
             gameUI = gameUIObject.GetComponent<GameUI>();
             InitializeGame();
             StartTurn();
-            
         }
 
         private bool CanMove(IPlayerData player)
@@ -55,14 +54,14 @@ namespace Core
             switch (type)
             {
                 case FractionType.Forest:
-                    return new ForestFaction{TerrainType = TerrainType.Forest};
+                    return new ForestFaction {TerrainType = TerrainType.Forest};
                 case FractionType.Mountain:
-                    return new MountainFaction{TerrainType = TerrainType.Mountain};
+                    return new MountainFaction {TerrainType = TerrainType.Mountain};
                 default:
                     return new FractionData("", "", Color.white, 0, 0, 0);
             }
         }
-        
+
         private void InitPlayers()
         {
             players = new Player[gameSettingsManager.playersCount];
@@ -78,8 +77,8 @@ namespace Core
                     Resources = new Dictionary<ResourceType, float>(),
                 };
                 var turnState = new PlayerTurnState();
-                
-                players[i] = new Player{Data = playerData, TurnState = turnState};
+
+                players[i] = new Player {Data = playerData, TurnState = turnState};
             }
         }
 
@@ -88,8 +87,8 @@ namespace Core
             foreach (var p in players)
             {
                 p.Data.Resources = gameSettingsManager.fractionStartResources[p.Data.FractionData.Type].ToDictionary();
-                
-                var unit = new Archer(p.Data);
+
+                var unit = new Builder(p.Data);
                 p.Data.AddUnit(unit);
                 mapManager.PlaceUnitRandomly(unit);
             }
@@ -109,7 +108,6 @@ namespace Core
                 EndTurn();
             if (CurrentPlayer.TurnState.GetCurrent() is IUnitData)
             {
-                
             }
         }
 
@@ -132,7 +130,14 @@ namespace Core
                 if (current is IUnitData unit)
                     ShowUnitPaths(unit);
             }
+
             gameUI.OpenPlayerMenu(CurrentPlayer);
+            if (CurrentPlayer.TurnState.ChosenEntities.Count == 0)
+            {
+                mapManager.FocusOnHex(CurrentPlayerData.Cities.First().Hex);
+                CurrentPlayer.TurnState.SetChosenEntity(CurrentPlayerData.Cities.First().Hex);
+            }
+
             Debug.Log($"Player {currentPlayerIndex + 1} turns");
         }
 
@@ -140,12 +145,12 @@ namespace Core
         {
             CurrentPlayer.TurnState.SetHighlightedEntities(mapManager.FindPossibleHexes(unit));
         }
-        
+
         private void ShowUnitTargets(IUnitData unit, Attack attack)
         {
             CurrentPlayer.TurnState.SetHighlightedEntities(mapManager.FindPossibleAttackTargets(unit, attack));
         }
-        
+
         public void HandleEndTurnClicked() =>
             EndTurn();
 
@@ -155,14 +160,14 @@ namespace Core
             if (unit != null)
                 unit.CurrentAttack = unit.Attacks[idx];
         }
-        
+
         public void HandleActionDropdownClicked(int idx)
         {
             var unit = (IUnitData) CurrentPlayer.TurnState.GetCurrent();
             if (unit == null)
                 return;
             unit.CurrentActionType = Enum.GetValues(typeof(UnitActionType)).Cast<UnitActionType>().ToArray()[idx];
-            
+
             CurrentPlayer.TurnState.ClearHighlightedEntity();
             switch (unit.CurrentActionType)
             {
@@ -179,7 +184,19 @@ namespace Core
                     throw new ArgumentOutOfRangeException();
             }
         }
-        
+
+        private void ChooseUnit(IUnitData unit)
+        {
+            CurrentPlayer.TurnState.ClearHighlightedEntity();
+            CurrentPlayer.TurnState.SetChosenEntity(unit);
+            if (unit.CurrentActionType == UnitActionType.Moving)
+                ShowUnitPaths(unit);
+            else if (unit.CurrentActionType == UnitActionType.Attacking)
+                ShowUnitTargets(unit, unit.CurrentAttack);
+            else
+                Debug.Log("building");
+        }
+
         public void HandleUnitClicked(IUnitData unit)
         {
             if (CurrentPlayer.TurnState.ChosenEntities.Contains(unit))
@@ -189,58 +206,82 @@ namespace Core
             }
             else if (CurrentPlayerData.Units.Contains(unit))
             {
-                CurrentPlayer.TurnState.SetChosenEntity(unit);
-                if (unit.CurrentActionType == UnitActionType.Moving)
-                    ShowUnitPaths(unit);
-                else if (unit.CurrentActionType == UnitActionType.Attacking)
-                    ShowUnitTargets(unit, unit.CurrentAttack);
-                else
-                    Debug.Log("building");
+                ChooseUnit(unit);
             }
             else if (CurrentPlayer.TurnState.GetCurrent() is IUnitData curUnit)
             {
                 if (CurrentPlayerData.Units.Contains(curUnit))
                 {
-                    curUnit.Attack(curUnit.CurrentAttack, unit);
+                    if (curUnit.CanAttack(curUnit.CurrentAttack, unit))
+                        curUnit.Attack(curUnit.CurrentAttack, unit);
+                    else
+                        ChooseUnit(unit);
                 }
             }
             else
             {
-                CurrentPlayer.TurnState.SetChosenEntity(unit);
-                ShowUnitPaths(unit);
+                // CurrentPlayer.TurnState.SetChosenEntity(unit);
+                // ShowUnitPaths(unit);
             }
-            
+
             gameUI.HandleUnitChosen(unit);
         }
 
         public void HandleHexClicked(IHexData hex)
         {
-            if (CurrentPlayer.TurnState.GetCurrent() is IUnitData unit && CurrentPlayerData.Units.Contains(unit))
+            if (CurrentPlayer.TurnState.GetCurrent() != null)
             {
-                if (mapManager.MoveUnitTo(unit, hex))
+                if (CurrentPlayer.TurnState.GetCurrent() is IUnitData unit && CurrentPlayerData.Units.Contains(unit))
                 {
-                    ShowUnitPaths(unit);
+                    if (mapManager.MoveUnitTo(unit, hex))
+                    {
+                        ShowUnitPaths(unit);
+                    }
                 }
-            }
-            else if (CurrentPlayer.TurnState.GetCurrent() is IHexData curHex)
-            {
-                
+                else if (CurrentPlayer.TurnState.GetCurrent() is IHexData curHex)
+                {
+                    mapManager.FocusOnHex(hex);
+                    if (CurrentPlayer.TurnState.ChosenEntities.Contains(hex))
+                        CurrentPlayer.TurnState.PopChosenEntity(hex);
+                    else
+                        CurrentPlayer.TurnState.SetChosenEntity(hex);
+                }
             }
             else
             {
-                mapManager.FocusOnHex(hex);
-                if (CurrentPlayer.TurnState.ChosenEntities.Contains(hex))
-                    CurrentPlayer.TurnState.SetChosenEntity(hex);
-                else    
-                    CurrentPlayer.TurnState.PopChosenEntity(hex);
+                CurrentPlayer.TurnState.SetChosenEntity(hex);
+                if (hex.Resource != null && hex.Resource.IntLevel > 0)
+                {
+                    var resource = hex.Resource;
+                    if (resource.ConnectedCity == null)
+                    {
+                        ShowResourcePaths(resource);
+                    }
+                }
             }
+        }
+
+        private void ShowResourcePaths(IResourceData resource)
+        {
+            var paths = mapManager.FindResourcePaths(resource.Hex, CurrentPlayerData.Cities.Select(x => x.Hex).ToList());
+            foreach (var p in paths)
+            {
+                Debug.Log(p.Value);
+            }
+            var hexes = new HashSet<IHexData>();
+            foreach (var hxs in paths.Values.Where(x => x != null).Select(x => x.Hexes))
+            {
+                foreach (var hx in hxs)
+                    hexes.Add(hx);
+            }
+            CurrentPlayer.TurnState.SetHighlightedEntities(hexes.ToList());
         }
 
         public void MoveCamera(Vector3 diff)
         {
             mapManager.MoveCamera(diff);
         }
-        
+
         public void ZoomCamera(float scroll)
         {
             mapManager.ZoomCamera(scroll);

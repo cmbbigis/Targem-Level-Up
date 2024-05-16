@@ -52,6 +52,8 @@ namespace Units.Models.Unit
         
         // BUILDING
         float BuildingPower { get; set; }
+        bool CanBuild();
+        void Build();
         
         // TURNING
         void StartTurn();

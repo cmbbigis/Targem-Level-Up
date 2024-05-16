@@ -25,8 +25,6 @@ namespace Map.Models.Map
 
         public Dictionary<IHexData, UnitPath> FindUnitPaths(IUnitData unit, float maxDistance);
         public IEnumerable<IHexData> FindPossibleHexes(IUnitData unit);
-        public List<ResourcePath> FindResourcePaths(IHexData source, IHexData destination, int maxPaths);
-
         public bool PlaceUnitAt(IUnitData unit, IHexData hex);
         public (bool, UnitPath) CanMoveUnitTo(IUnitData unit, IHexData hex);
         public bool MoveUnitTo(IUnitData unit, IHexData hex);

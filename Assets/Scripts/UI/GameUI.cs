@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Cities.Models.City;
 using Common;
@@ -29,6 +30,8 @@ namespace UI
                     private GameObject unitAttackMenu;
                         private TMP_Dropdown unitAttackDropdown;
                     private GameObject unitBuildMenu;
+                        private Button unitBuildButton;
+                        private TMP_Text unitBuildData;
             private GameObject resourcePanel;
             private GameObject cityPanel;
 
@@ -55,10 +58,13 @@ namespace UI
                         unitAttackMenu = GameObject.Find("UnitAttackMenu");
                             unitAttackDropdown = GameObject.Find("UnitAttackDropdown").GetComponent<TMP_Dropdown>();
                         unitBuildMenu = GameObject.Find("UnitBuildMenu");
+                            unitBuildButton = GameObject.Find("UnitBuildButton").GetComponent<Button>();
+                            unitBuildData = GameObject.Find("UnitBuildData").GetComponent<TMP_Text>();
                 resourcePanel = GameObject.Find("ResourcePanel");
                 cityPanel = GameObject.Find("CityPanel");
 
                 unitMenus = new[] {unitMoveMenu, unitAttackMenu, unitBuildMenu};
+                
             CloseAllPanels();
         }
 
@@ -67,6 +73,14 @@ namespace UI
         
         [CanBeNull]
         private IUnitData CurrentUnit => CurrentEntity as IUnitData;
+
+        public void UnitBuild()
+        {
+            var unit = CurrentUnit;
+            if (unit == null || unit.Hex.Resource == null || !unit.CanBuild())
+                return;
+            unit.Build();
+        }
         
         private void Update()
         {
@@ -94,13 +108,16 @@ namespace UI
                                  $"MovementLeft: {unit.MovementInfo.MovesLeft}/{unit.MovementRange}\n" +
                                  $"Defence: {unit.Defense}\n" +
                                  $"BuildingPower: {unit.BuildingPower}");
+                unitBuildButton.interactable = unit.CanBuild();
+                if (unit.Hex.Resource != null)
+                    unitBuildData.text = $"Level: {Math.Floor(unit.Hex.Resource.Level)}\nProgress: {string.Format("{0:N0}%", (unit.Hex.Resource.Level - Math.Floor(unit.Hex.Resource.Level)) * 100)}";
             }
             else if (currentEntity is IResourceData)
                 Debug.Log("open resource menu");
             else if (currentEntity is ICityData)
                 Debug.Log("open city menu");
-            else if (currentEntity is IHexData)
-                Debug.Log("open hex menu");
+            // else if (currentEntity is IHexData)
+                // Debug.Log("open hex menu");
         }
 
         private void CloseAllPanels()
@@ -123,7 +140,12 @@ namespace UI
         
         private void OpenUnitBuildMenu()
         {
+            var unit = CurrentUnit;
+            if (unit == null)
+                return;
+            
             unitBuildMenu.SetActive(true);
+            unitBuildButton.interactable = unit.CanBuild();
         }
 
         private void OpenUnitAttackMenu()
@@ -148,8 +170,13 @@ namespace UI
             unitActionMenu.SetActive(true);
             
             unitActionDropdown.ClearOptions();
-            unitActionDropdown.AddOptions(EnumExtensions.GetValues<UnitActionType>().Select(x => new TMP_Dropdown.OptionData(x.ToString())).ToList());
-            unitActionDropdown.SetValueWithoutNotify((int) unit.CurrentActionType);
+            var options = new List<String> {UnitActionType.Moving.ToString()};
+            if (unit.Attacks.Count > 0)
+                options.Add(UnitActionType.Attacking.ToString());
+            if (unit.BuildingPower > 0)
+                options.Add(UnitActionType.Building.ToString());
+            unitActionDropdown.AddOptions(options);
+            unitActionDropdown.SetValueWithoutNotify(options.IndexOf(unit.CurrentActionType.ToString()));
             
             CloseAllUnitMenus();
 
@@ -191,7 +218,6 @@ namespace UI
         public void OpenPlayerMenu(Player player)
         {
             currentPlayer = player;
-            currentEntity = player.TurnState.GetCurrent();
             // var currEntity = player.TurnState.GetCurrent();
             // if (currEntity is IUnitData unit)
             // {
@@ -217,7 +243,10 @@ namespace UI
 
         public void HandleActionDropdownClicked(TMP_Dropdown change)
         {
-            gameManager.HandleActionDropdownClicked(change.value);
+            var type = 0;
+            if (Enum.TryParse(change.options[change.value].text, out UnitActionType i))
+                type = (int) i;
+            gameManager.HandleActionDropdownClicked(type);
             OpenUnitActionMenu();
         }
     }

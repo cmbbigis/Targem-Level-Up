@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cities.Models.City;
+using Common;
 using Core;
 using JetBrains.Annotations;
 using Map.Models.Hex;
@@ -87,10 +88,14 @@ namespace Map
         public IHexData SetHexagonAt(Vector2 cords, IHexData hex) => _hexes[cords] = hex;
         public IHexData SetHexagonAt(int x, int y, IHexData hex) => SetHexagonAt(new Vector2(x, y), hex);
 
+
+        private Dictionary<ResourceType, int> resourceCounts;
         public void GenerateMap(IPlayerData[] players)
         {
             var seedX = Random.Range(0f, 100f);
             var seedY = Random.Range(0f, 100f);
+
+            resourceCounts = _gameSettingsManager.resourcesCount.ToDictionary();
             
             PlaceCitiesAndInitialBiomes(players);
             
@@ -103,7 +108,39 @@ namespace Map
 
                     var noise = Mathf.PerlinNoise((x + seedX) * 0.1f, (y + seedY) * 0.1f);
                     var (terrain, z) = DetermineTerrainByNoise(noise);
-                    InitHexAt(new HexData(x, y, terrain, z), new Vector2(x, y));
+                    ResourceType? resource = null;
+                    if (terrain == TerrainType.Forest)
+                    {
+                        var random = Random.Range(0, 3);
+                        resource = random == 0 ? ResourceType.Food : ResourceType.Wood;
+                    }
+                    else if (terrain == TerrainType.Plains)
+                    {
+                        resource = ResourceType.Food;
+                    }
+                    // else if (terrain == TerrainType.Desert)
+                    // {
+                    //     var random = Random.Range(0, 5);
+                    //     if (random == 5)
+                    //     {
+                    //         resource = ResourceType.Food;
+                    //     }
+                    //     else if (random == 4)
+                    //     {
+                    //         resource = ResourceType.Wood;
+                    //     }
+                    //     else
+                    //     {
+                    //         resource = ResourceType.Clay;
+                    //     }
+                    // }
+                    var hexData = new HexData(x, y, terrain, z);
+                    if (resource != null)
+                    {
+                        hexData.Resource = new ResourceData {Hex = hexData, Type = resource.Value, Level = 0};
+                        resourceCounts[resource.Value]--;
+                    }
+                    InitHexAt(hexData, new Vector2(x, y));
                 }
             }
 
@@ -112,7 +149,7 @@ namespace Map
 
         private void PlaceResources()
         {
-            var availableHexesForResources = new Dictionary<TerrainType, List<IHexData>>();
+            var availableHexesForResources = new Dictionary<ResourceType, List<IHexData>>();
 
             // Собрать все доступные гексы по типу территории
             for (var x = 0; x < Width; x++)
@@ -122,43 +159,40 @@ namespace Map
                     var hex = GetHexagonAt(x, y);
                     if (hex.Resource == null) // Убедиться, что гекс еще не занят другим ресурсом
                     {
-                        if (!availableHexesForResources.ContainsKey(hex.Terrain))
-                            availableHexesForResources[hex.Terrain] = new List<IHexData>();
-                
-                        availableHexesForResources[hex.Terrain].Add(hex);
+                        foreach (var type in _gameSettingsManager.biomeResources[hex.Terrain])
+                        {
+                            if (!availableHexesForResources.ContainsKey(type))
+                                availableHexesForResources[type] = new List<IHexData>();
+                            availableHexesForResources[type].Add(hex);
+                        }
                     }
                 }
             }
 
             // Распределить ресурсы по доступным гексам
-            foreach (var biome in _gameSettingsManager.biomeResources)
+            foreach (var resource in _gameSettingsManager.resourcesCount)
             {
-                if (availableHexesForResources.TryGetValue(biome.Key, out var hexList))
+                if (availableHexesForResources.TryGetValue(resource.Key, out var hexList))
                 {
-                    foreach (var resourceType in biome.Value)
+                    for (var i = 0; i < resourceCounts[resource.Key]; i++)
                     {
-                        var count = _gameSettingsManager.resourcesCount[resourceType];
-
-                        for (var i = 0; i < count; i++)
+                        if (hexList.Count == 0)
                         {
-                            if (hexList.Count == 0)
-                            {
-                                Debug.LogWarning($"Not enough hexes to place all resources of type {resourceType} in biome {biome.Key}");
-                                break; // Прекратить распределение ресурсов, если места не хватает
-                            }
-
-                            var hexIndex = Random.Range(0, hexList.Count);
-                            var selectedHex = hexList[hexIndex];
-                            selectedHex.Resource = new ResourceData{Type = resourceType, Hex = selectedHex}; // Создать новый объект ресурса
-                            _gridManager.ReinitHexAtCords(selectedHex.Cords);
-                            hexList.RemoveAt(hexIndex); // Удалить гекс из списка доступных, чтобы избежать повторения
+                            Debug.LogWarning($"Not enough hexes to place all resources of type {resource.Key}");
+                            break; // Прекратить распределение ресурсов, если места не хватает
                         }
+
+                        var hexIndex = Random.Range(0, hexList.Count);
+                        var selectedHex = hexList[hexIndex];
+                        selectedHex.Resource = new ResourceData{Type = resource.Key, Hex = selectedHex}; // Создать новый объект ресурса
+                        _gridManager.ReinitHexAtCords(selectedHex.Cords);
+                        hexList.RemoveAt(hexIndex); // Удалить гекс из списка доступных, чтобы избежать повторения
                     }
                 }
-                else
-                {
-                    Debug.LogWarning($"No available hexes found for biome {biome.Key}");
-                }
+                // else
+                // {
+                    // Debug.LogWarning($"No available hexes found for biome {biome.Key}");
+                // }
             }
         }
         
@@ -193,10 +227,12 @@ namespace Map
                 var cityLocation = PlaceCity();
                 var preferredTerrain = players[i].FractionData.TerrainType;
                 var cityData = new HexData((int) cityLocation.x, (int) cityLocation.y, preferredTerrain);
-                cityData.City = new CityData
+                var city = new CityData
                 {
                     Hex = cityData,
                 };
+                players[i].AddCity(city);
+                cityData.City = city;
                 InitHexAt(cityData, cityLocation);
 
                 // Создание стартового биома вокруг города
@@ -209,9 +245,14 @@ namespace Map
                         if (nx >= 0 && nx < Width && ny >= 0 && ny < Height)
                         {
                             var noise = Mathf.PerlinNoise((nx + seedX), (ny + seedY));
-                            var data = new HexData(nx, ny, preferredTerrain, noise)
-                            {
-                            };
+                            ResourceType? resource = null;
+                            if (preferredTerrain == TerrainType.Forest)
+                                resource = ResourceType.Wood;
+                            else if (preferredTerrain == TerrainType.Plains)
+                                resource = ResourceType.Food;
+                            var data = new HexData(nx, ny, preferredTerrain, noise);
+                            if (resource != null)
+                                data.Resource = new ResourceData { Hex = data, Type = resource.Value, };
                             InitHexAt(data, new Vector2(nx, ny));
                         }
                     }
@@ -285,7 +326,9 @@ namespace Map
         }
         private float GetHexCapacity(IHexData hex)
         {
-            throw new NotImplementedException();
+            if (_gameSettingsManager.biomeCapacities.TryGetValue(hex.Terrain, out var capacity))
+                return capacity;
+            return 1;
         }
         
         public List<IHexData> GetHexesWithinDistance(IHexData start, float n)
@@ -378,44 +421,50 @@ namespace Map
                    .Select(x => x.GetAttackTarget())
                    .Where(x => x != null && unit.CanAttack(attack, x));
         }
-        public List<ResourcePath> FindResourcePaths(IHexData source, IHexData destination, int maxPaths)
+        public Dictionary<IHexData, ResourcePath> FindResourcePaths(IHexData source, List<IHexData> destinations)
         {
-            var paths = new List<ResourcePath>();
-            var pathQueue = new List<ResourcePath> {new() { Hexes = new List<IHexData> { source }, Capacity = float.MaxValue }};
-
-            while (pathQueue.Count > 0 && paths.Count < maxPaths)
+            var foundPaths = new Dictionary<IHexData, ResourcePath>();
+            foreach (var dest in destinations)
             {
-                // Сортировка очереди по количеству хексов в пути, восходящий порядок
-                pathQueue.Sort((a, b) => a.Hexes.Count.CompareTo(b.Hexes.Count));
-        
-                var currentPath = pathQueue[0];
-                pathQueue.RemoveAt(0);
+                foundPaths[dest] = null; // Инициализация путей как null
+            }
+
+            var pathQueue = new Queue<ResourcePath>();
+            pathQueue.Enqueue(new ResourcePath { Hexes = new List<IHexData> { source }, Capacity = float.MaxValue });
+
+            HashSet<IHexData> visited = new HashSet<IHexData>(); // Для контроля уже посещённых гексов
+            visited.Add(source);
+
+            while (pathQueue.Count > 0 && destinations.Count > 0)
+            {
+                var currentPath = pathQueue.Dequeue();
                 var currentHex = currentPath.Hexes.Last();
 
-                if (currentHex == destination)
+                if (destinations.Contains(currentHex))
                 {
                     currentPath.Capacity = currentPath.Hexes.Select(GetHexCapacity).Min();
-                    paths.Add(currentPath);
-                    continue;
+                    foundPaths[currentHex] = currentPath;
+                    destinations.Remove(currentHex); // Удаление найденного города из списка целей
                 }
 
                 foreach (var neighbor in GetNeighbours(currentHex))
                 {
-                    if (currentPath.Hexes.Contains(neighbor))
-                        continue;
-
-                    var newPath = new ResourcePath
+                    if (!visited.Contains(neighbor))
                     {
-                        Hexes = new List<IHexData>(currentPath.Hexes) { neighbor },
-                        Capacity = currentPath.Capacity
-                    };
-
-                    pathQueue.Add(newPath);
+                        visited.Add(neighbor); // Пометка гекса как посещённого
+                        var newPath = new ResourcePath
+                        {
+                            Hexes = new List<IHexData>(currentPath.Hexes) { neighbor },
+                            Capacity = currentPath.Capacity
+                        };
+                        pathQueue.Enqueue(newPath);
+                    }
                 }
             }
 
-            return paths;
+            return foundPaths;
         }
+
         #endregion
         
         #region UNITS
@@ -430,7 +479,7 @@ namespace Map
         public (bool, UnitPath) CanMoveUnitTo(IUnitData unit, IHexData hex)
         {
             var possiblePaths = FindUnitPaths(unit, unit.MovementInfo.MovesLeft);
-            if (!unit.CanStayOn(hex) || !possiblePaths.Keys.Contains(hex))
+            if (unit.CurrentActionType != UnitActionType.Moving || !unit.CanStayOn(hex) || !possiblePaths.Keys.Contains(hex))
                 return (false, null);
             return (true, possiblePaths[hex]);
         }

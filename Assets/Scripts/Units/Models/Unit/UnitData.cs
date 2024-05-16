@@ -177,6 +177,17 @@ namespace Units.Models.Unit
         // BUILDING
         public float BuildingPower { get; set; }
 
+        public bool CanBuild()
+        {
+            return Hex.Resource != null;
+        }
+
+        public void Build()
+        {
+            Hex.Resource.Level += BuildingPower / 10;
+            MovementInfo.MovesLeft = 0;
+        }
+
         // HIGHLIGHTING
         public bool IsChosen { get; set; }
         public bool IsHighlighted { get; set; }
