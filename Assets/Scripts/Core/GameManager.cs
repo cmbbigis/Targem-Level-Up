@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cities.Models.City;
+using Common;
 using Fraction;
 using Fraction.Fractions;
 using Map;
@@ -9,6 +10,7 @@ using Map.Models.Hex;
 using Map.Models.Terrain;
 using Players.Models.Player;
 using Resources.Models.Resource;
+using UI;
 using Units.Models.Unit;
 using Units.Models.Unit.Units;
 using UnityEngine;
@@ -21,9 +23,11 @@ namespace Core
         [SerializeField] private GameObject mapManagerObject;
         private MapManager mapManager;
         
-        [FormerlySerializedAs("gameSettingsManager")]
         [SerializeField] private GameObject gameSettingsManagerObject;
         private GameSettingsManager gameSettingsManager;
+        
+        [SerializeField] private GameObject gameUIObject;
+        private GameUI gameUI;        
 
         private Player[] players;
         private int currentPlayerIndex;
@@ -35,6 +39,7 @@ namespace Core
         {
             mapManager = mapManagerObject.GetComponent<MapManager>();
             gameSettingsManager = gameSettingsManagerObject.GetComponent<GameSettingsManager>();
+            gameUI = gameUIObject.GetComponent<GameUI>();
             InitializeGame();
             StartTurn();
             
@@ -82,6 +87,8 @@ namespace Core
         {
             foreach (var p in players)
             {
+                p.Data.Resources = gameSettingsManager.fractionStartResources[p.Data.FractionData.Type].ToDictionary();
+                
                 var unit = new Infantry(p.Data);
                 p.Data.AddUnit(unit);
                 mapManager.PlaceUnitRandomly(unit);
@@ -133,12 +140,29 @@ namespace Core
             CurrentPlayer.TurnState.SetHighlightedEntities(mapManager.FindPossibleHexes(unit));
         }
         
-        private void ShowUnitTargets(IUnitData unit)
+        private void ShowUnitTargets(IUnitData unit, Attack attack)
         {
-            // CurrentPlayer.TurnState.SetHighlightedEntities(mapManager.FindPossibleAttackTargets(unit, ));
+            CurrentPlayer.TurnState.SetHighlightedEntities(mapManager.FindPossibleAttackTargets(unit, attack));
         }
         
-        public void HandleUnitClicked(IUnitData unit)
+        public void HandleEndTurnClicked() =>
+            EndTurn();
+
+        public void HandleAttackDropdownClicked(int idx)
+        {
+            var unit = (IUnitData) CurrentPlayer.TurnState.GetCurrent();
+            if (unit != null)
+                unit.CurrentAttack = unit.Attacks[idx];
+        }
+        
+        public void HandleActionDropdownClicked(int idx)
+        {
+            var unit = (IUnitData) CurrentPlayer.TurnState.GetCurrent();
+            if (unit != null)
+                unit.CurrentActionType = Enum.GetValues(typeof(UnitActionType)).Cast<UnitActionType>().ToArray()[idx];
+        }
+        
+        public void HandleUnitClicked(IUnitData unit, GameObject obj)
         {
             if (CurrentPlayer.TurnState.ChosenEntities.Contains(unit))
             {
@@ -148,13 +172,20 @@ namespace Core
             else if (CurrentPlayerData.Units.Contains(unit))
             {
                 CurrentPlayer.TurnState.SetChosenEntity(unit);
-                ShowUnitPaths(unit);
+                if (unit.CurrentActionType == UnitActionType.Moving)
+                    ShowUnitPaths(unit);
+                else if (unit.CurrentActionType == UnitActionType.Attacking)
+                    ShowUnitTargets(unit, unit.CurrentAttack);
+                else
+                    Debug.Log("building");
             }
             else
             {
                 CurrentPlayer.TurnState.SetChosenEntity(unit);
                 ShowUnitPaths(unit);
             }
+            
+            gameUI.HandleUnitChosen(unit);
         }
 
         public void HandleHexClicked(IHexData hex)
@@ -165,6 +196,10 @@ namespace Core
                 {
                     ShowUnitPaths(unit);
                 }
+            }
+            else if (CurrentPlayer.TurnState.GetCurrent() is IHexData curHex)
+            {
+                
             }
             else
             {

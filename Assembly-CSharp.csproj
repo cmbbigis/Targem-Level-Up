@@ -75,6 +75,7 @@
     <Compile Include="Assets\Scripts\Cities\CityManager.cs" />
     <Compile Include="Assets\Scripts\UI\Map\Unit\UnitManager.cs" />
     <Compile Include="Assets\Scripts\Units\Models\Unit\Units\Infantry.cs" />
+    <Compile Include="Assets\Scripts\Common\EnumExtensions.cs" />
     <Compile Include="Assets\Scripts\Fraction\Fractions\ForestFraction.cs" />
     <Compile Include="Assets\Scripts\Resources\Models\Resource\IResourceData.cs" />
     <Compile Include="Assets\Scripts\Map\Models\Hex\HexData.cs" />

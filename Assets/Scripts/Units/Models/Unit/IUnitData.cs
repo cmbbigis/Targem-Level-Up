@@ -3,11 +3,22 @@ using Core;
 using Map.Models.Hex;
 using Map.Models.Terrain;
 using Players.Models.Player;
+using UnityEngine;
 
 namespace Units.Models.Unit
 {
+    public enum UnitActionType
+    {
+        Moving = 0,
+        Attacking = 1,
+        Building = 2
+    }
+    
     public interface IUnitData: IEntity
     {
+        GameObject Object { get; set; }
+        Sprite Sprite { get; }
+
         // MASTER
         IPlayerData Master { get; }
 
@@ -23,10 +34,14 @@ namespace Units.Models.Unit
         bool MoveTo(IHexData destination, float distance);
         float GetMovementCost(IHexData hex);
         
+        // TURN STATE
+        UnitActionType CurrentActionType { get; set; }
+        Attack CurrentAttack { get; set; }
+
         // ATTACKING
         float HealthPoints { get; set; }
         float Defense { get; set; }
-        ICollection<Attack> Attacks { get; set; }
+        List<Attack> Attacks { get; set; }
         bool IsAlive { get; }
         bool CanAttack(Attack attack, IUnitData target);
         bool Attack(Attack attack, IUnitData target);

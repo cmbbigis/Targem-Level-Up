@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using Common;
+using Core;
 using TMPro;
 using Units.Models.Unit;
 using UnityEngine;
@@ -25,12 +28,16 @@ namespace UI
             private GameObject resourcePanel;
             private GameObject cityPanel;
 
-        [SerializeField] public GameObject inputControllerObject;
-        private InputController inputController;
+        private GameObject[] unitMenus;
+
+        private IUnitData currentUnit;
+            
+        [SerializeField] public GameObject gameManagerObject;
+        private GameManager gameManager;
 
         void Start()
         {
-            inputController = inputControllerObject.GetComponent<InputController>();
+            gameManager = gameManagerObject.GetComponent<GameManager>();
 
             UI = GameObject.Find("UI");
             menuPanel = GameObject.Find("MenuPanel");
@@ -46,8 +53,9 @@ namespace UI
                         unitBuildMenu = GameObject.Find("UnitBuildMenu");
                 resourcePanel = GameObject.Find("ResourcePanel");
                 cityPanel = GameObject.Find("CityPanel");
-                
-            CloseAllPanels();
+
+                unitMenus = new[] {unitMoveMenu, unitAttackMenu, unitBuildMenu};
+            // CloseAllPanels();
         }
 
         private void CloseAllPanels()
@@ -56,35 +64,80 @@ namespace UI
             resourcePanel.SetActive(false);
             cityPanel.SetActive(false);
         }
-        
-        public void OpenUnitMenu(IUnitData unit, SpriteRenderer spriteRenderer)
+
+        private void CloseAllUnitMenus()
         {
+            foreach (var m in unitMenus)
+                m.SetActive(false);
+        }
+
+        private void OpenUnitAttackMenu()
+        {
+            unitAttackDropdown.ClearOptions();
+            unitAttackDropdown.AddOptions(currentUnit.Attacks.Select(x => new TMP_Dropdown.OptionData(x.Type.ToString())).ToList());
+            unitActionDropdown.value = currentUnit.Attacks.IndexOf(currentUnit.CurrentAttack);
+        }
+
+        private void OpenUnitActionMenu()
+        {
+            unitActionMenu.SetActive(true);
+            
+            unitActionDropdown.ClearOptions();
+            unitActionDropdown.AddOptions(EnumExtensions.GetValues<UnitActionType>().Select(x => new TMP_Dropdown.OptionData(x.ToString())).ToList());
+            unitActionDropdown.value = (int) currentUnit.CurrentActionType;
+            
+            CloseAllUnitMenus();
+            unitMenus[(int) currentUnit.CurrentActionType].SetActive(true);
+
+            if (currentUnit.CurrentActionType == UnitActionType.Attacking)
+                OpenUnitAttackMenu();
+        }
+        
+        public void OpenUnitMenu(IUnitData unit)
+        {
+            // currentUnit = unit;
+            
             CloseAllPanels();
             unitPanel.SetActive(true);
-            unitSprite.sprite = spriteRenderer.sprite;
+            unitSprite.sprite = unit.Sprite;
             unitData.SetText($"{unit.UnitType.ToString()} of {unit.Master.Name}\n" +
                              $"HP: {unit.HealthPoints}\n" +
                              $"MovementLeft: {unit.MovementInfo.MovesLeft}/{unit.MovementRange}\n" +
                              $"Defence: {unit.Defense}\n" +
                              $"BuildingPower: {unit.BuildingPower}");
             
-            unitAttackDropdown.ClearOptions();
-            unitAttackDropdown.AddOptions(unit.Attacks.Select(x => new TMP_Dropdown.OptionData(x.Type.ToString())).ToList());
+            CloseAllUnitMenus();
+            // OpenUnitActionMenu();
         }
 
+        public void OpenPlayerMenu(Player player)
+        {
+            CloseAllPanels();
+            var currEntity = player.TurnState.GetCurrent();
+            if (currEntity is IUnitData unit)
+            {
+                // OpenUnitMenu(unit);
+            }
+        }
+
+        public void HandleUnitChosen(IUnitData unit)
+        {
+            // OpenUnitMenu(unit);
+        }
+        
         public void HandleEndButtonClicked()
         {
-            inputController.HandleEndTurnClicked();
+            gameManager.HandleEndTurnClicked();
         }
 
-        public void HandleAttackDropdownClicked(int idx)
+        public void HandleAttackDropdownClicked(TMP_Dropdown change)
         {
-            inputController.HandleAttackDropdownClicked(idx);
+            // gameManager.HandleAttackDropdownClicked(change.value);
         }
 
-        public void HandleUnitChosen(IUnitData unit, SpriteRenderer spriteRenderer)
+        public void HandleActionDropdownClicked(TMP_Dropdown change)
         {
-            OpenUnitMenu(unit, spriteRenderer);
+            // gameManager.HandleActionDropdownClicked(change.value);
         }
     }
 }
