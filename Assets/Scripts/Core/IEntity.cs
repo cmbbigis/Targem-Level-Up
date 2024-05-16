@@ -1,3 +1,5 @@
+using Map.Models.Hex;
+
 namespace Core
 {
     public interface IEntity

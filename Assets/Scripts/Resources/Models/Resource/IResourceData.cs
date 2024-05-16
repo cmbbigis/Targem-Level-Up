@@ -2,7 +2,7 @@
 
 namespace Resources.Models.Resource
 {
-    public interface IResourceData: IEntity
+    public interface IResourceData: IAttackable
     {
         ResourceType Type { get; }
         int Quantity { get; set; }

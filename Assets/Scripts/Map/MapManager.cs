@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cities.Models.City;
 using Core;
+using JetBrains.Annotations;
 using Map.Models.Hex;
 using Map.Models.Map;
 using Map.Models.Terrain;
@@ -148,7 +149,7 @@ namespace Map
 
                             var hexIndex = Random.Range(0, hexList.Count);
                             var selectedHex = hexList[hexIndex];
-                            selectedHex.Resource = new ResourceData{Type = resourceType}; // Создать новый объект ресурса
+                            selectedHex.Resource = new ResourceData{Type = resourceType, Hex = selectedHex}; // Создать новый объект ресурса
                             _gridManager.ReinitHexAtCords(selectedHex.Cords);
                             hexList.RemoveAt(hexIndex); // Удалить гекс из списка доступных, чтобы избежать повторения
                         }
@@ -191,9 +192,10 @@ namespace Map
                 // Расположение города
                 var cityLocation = PlaceCity();
                 var preferredTerrain = players[i].FractionData.TerrainType;
-                var cityData = new HexData((int)cityLocation.x, (int)cityLocation.y, preferredTerrain)
+                var cityData = new HexData((int) cityLocation.x, (int) cityLocation.y, preferredTerrain);
+                cityData.City = new CityData
                 {
-                    City = new CityData()
+                    Hex = cityData,
                 };
                 InitHexAt(cityData, cityLocation);
 
@@ -369,15 +371,12 @@ namespace Map
         }
         public IEnumerable<IHexData> FindPossibleHexes(IUnitData unit) =>
             FindUnitPaths(unit, unit.MovementInfo.MovesLeft).Keys;
-        public IEnumerable<IEntity> FindPossibleAttackTargets(IUnitData unit, Attack attack)
+        
+        public IEnumerable<IAttackable> FindPossibleAttackTargets(IUnitData unit, Attack attack)
         {
             return GetHexesWithinDistance(unit.Hex, attack.Range)
-                   .Where(x => x.Unit != null || x.City != null || x.Resource != null && x.Resource.Level > 0)
-                   .Select(x => x.Unit != null
-                               ? (IEntity) x.Unit
-                               : x.City != null
-                                   ? x.City
-                                   : x.Resource);
+                   .Select(x => x.GetAttackTarget())
+                   .Where(x => x != null && unit.CanAttack(attack, x));
         }
         public List<ResourcePath> FindResourcePaths(IHexData source, IHexData destination, int maxPaths)
         {

@@ -12,7 +12,10 @@ namespace Units.Models.Unit.Units
                 UnitType.Infantry, 
                 20, 
                 5, 
-                new List<Attack> {new() {Power = 5, Type = AttackType.Melee, Range = 1}}, 
+                new List<Attack>
+                {
+                    new() {Power = 5, Type = AttackType.Melee, Range = 1, Volume = 3}
+                }, 
                 3,
                 new HashSet<TerrainType> {TerrainType.Desert, TerrainType.Dirt, TerrainType.Forest, TerrainType.Mountain, TerrainType.Plains, TerrainType.Snow, TerrainType.Swamp},
                 10

@@ -89,7 +89,7 @@ namespace Core
             {
                 p.Data.Resources = gameSettingsManager.fractionStartResources[p.Data.FractionData.Type].ToDictionary();
                 
-                var unit = new Infantry(p.Data);
+                var unit = new Archer(p.Data);
                 p.Data.AddUnit(unit);
                 mapManager.PlaceUnitRandomly(unit);
             }
@@ -196,6 +196,13 @@ namespace Core
                     ShowUnitTargets(unit, unit.CurrentAttack);
                 else
                     Debug.Log("building");
+            }
+            else if (CurrentPlayer.TurnState.GetCurrent() is IUnitData curUnit)
+            {
+                if (CurrentPlayerData.Units.Contains(curUnit))
+                {
+                    curUnit.Attack(curUnit.CurrentAttack, unit);
+                }
             }
             else
             {

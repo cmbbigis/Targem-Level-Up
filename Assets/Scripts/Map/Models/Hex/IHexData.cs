@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Cities.Models.City;
 using Core;
+using JetBrains.Annotations;
 using Map.Models.InteractiveObjects;
 using Map.Models.Terrain;
 using Resources;
@@ -25,5 +26,8 @@ namespace Map.Models.Hex
         IUnitData Unit { get; set; }
         IResourceData Resource { get; set; }
         IInteractiveObject InteractiveObject { get; set; }
+
+        [CanBeNull]
+        IAttackable GetAttackTarget();
     }
 }
