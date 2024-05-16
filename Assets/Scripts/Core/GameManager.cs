@@ -88,7 +88,7 @@ namespace Core
             {
                 p.Data.Resources = gameSettingsManager.fractionStartResources[p.Data.FractionData.Type].ToDictionary();
 
-                var unit = new Builder(p.Data);
+                var unit = new Infantry(p.Data);
                 p.Data.AddUnit(unit);
                 mapManager.PlaceUnitRandomly(unit);
             }
@@ -126,7 +126,7 @@ namespace Core
             var current = CurrentPlayer.TurnState.GetCurrent();
             if (current != null)
             {
-                mapManager.FocusOnEntity(current);
+                // mapManager.FocusOnEntity(current);
                 if (current is IUnitData unit)
                     ShowUnitPaths(unit);
             }
@@ -134,7 +134,7 @@ namespace Core
             gameUI.OpenPlayerMenu(CurrentPlayer);
             if (CurrentPlayer.TurnState.ChosenEntities.Count == 0)
             {
-                mapManager.FocusOnHex(CurrentPlayerData.Cities.First().Hex);
+                // mapManager.FocusOnHex(CurrentPlayerData.Cities.First().Hex);
                 CurrentPlayer.TurnState.SetChosenEntity(CurrentPlayerData.Cities.First().Hex);
             }
 
