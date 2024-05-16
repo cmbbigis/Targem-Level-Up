@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Cities\Models\Effects\IEffect.cs" />
     <Compile Include="Assets\Scripts\Core\SettingsManager.cs" />
+    <Compile Include="Assets\NotSorted\Fantasy Character Pixel Art Pack1\Script\CharacterAnimation.cs" />
     <Compile Include="Assets\Scripts\Core\GameSettingsManager.cs" />
     <Compile Include="Assets\Scripts\Core\IEntity.cs" />
     <Compile Include="Assets\Scripts\Map\Models\Hex\IHexData.cs" />

@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Linq;
+using Cities.Models.City;
 using Common;
 using Core;
+using JetBrains.Annotations;
+using Map.Models.Hex;
+using Resources.Models.Resource;
 using TMPro;
 using Units.Models.Unit;
 using UnityEngine;
@@ -30,7 +34,7 @@ namespace UI
 
         private GameObject[] unitMenus;
 
-        private IUnitData currentUnit;
+        private Player currentPlayer;
             
         [SerializeField] public GameObject gameManagerObject;
         private GameManager gameManager;
@@ -58,6 +62,47 @@ namespace UI
             CloseAllPanels();
         }
 
+        private IEntity currentEntity;
+        private IEntity CurrentEntity { get => currentPlayer.TurnState.GetCurrent(); set => currentEntity = value; }
+        
+        [CanBeNull]
+        private IUnitData CurrentUnit => CurrentEntity as IUnitData;
+        
+        private void Update()
+        {
+            if (currentEntity != currentPlayer.TurnState.GetCurrent())
+            {
+                currentEntity = currentPlayer.TurnState.GetCurrent();
+                if (currentEntity is IUnitData)
+                    OpenUnitMenu();
+                else if (currentEntity is IResourceData)
+                    Debug.Log("open resource menu");
+                else if (currentEntity is ICityData)
+                    Debug.Log("open city menu");
+                else if (currentEntity is IHexData)
+                    Debug.Log("open hex menu");
+                return;
+            }
+
+            if (currentEntity == null)
+                CloseAllPanels();
+            else if (currentEntity is IUnitData unit)
+            {
+                unitSprite.sprite = unit.Sprite;
+                unitData.SetText($"{unit.UnitType.ToString()} of {unit.Master.Name}\n" +
+                                 $"HP: {unit.HealthPoints}\n" +
+                                 $"MovementLeft: {unit.MovementInfo.MovesLeft}/{unit.MovementRange}\n" +
+                                 $"Defence: {unit.Defense}\n" +
+                                 $"BuildingPower: {unit.BuildingPower}");
+            }
+            else if (currentEntity is IResourceData)
+                Debug.Log("open resource menu");
+            else if (currentEntity is ICityData)
+                Debug.Log("open city menu");
+            else if (currentEntity is IHexData)
+                Debug.Log("open hex menu");
+        }
+
         private void CloseAllPanels()
         {
             unitPanel.SetActive(false);
@@ -83,24 +128,32 @@ namespace UI
 
         private void OpenUnitAttackMenu()
         {
+            var unit = CurrentUnit;
+            if (unit == null)
+                return;
+            
             unitAttackMenu.SetActive(true);
             
             unitAttackDropdown.ClearOptions();
-            unitAttackDropdown.AddOptions(currentUnit.Attacks.Select(x => new TMP_Dropdown.OptionData(x.Type.ToString())).ToList());
-            unitAttackDropdown.SetValueWithoutNotify(currentUnit.Attacks.IndexOf(currentUnit.CurrentAttack));
+            unitAttackDropdown.AddOptions(unit.Attacks.Select(x => new TMP_Dropdown.OptionData(x.Type.ToString())).ToList());
+            unitAttackDropdown.SetValueWithoutNotify(unit.Attacks.IndexOf(unit.CurrentAttack));
         }
 
         private void OpenUnitActionMenu()
         {
+            var unit = CurrentUnit;
+            if (unit == null)
+                return;
+            
             unitActionMenu.SetActive(true);
             
             unitActionDropdown.ClearOptions();
             unitActionDropdown.AddOptions(EnumExtensions.GetValues<UnitActionType>().Select(x => new TMP_Dropdown.OptionData(x.ToString())).ToList());
-            unitActionDropdown.SetValueWithoutNotify((int) currentUnit.CurrentActionType);
+            unitActionDropdown.SetValueWithoutNotify((int) unit.CurrentActionType);
             
             CloseAllUnitMenus();
 
-            switch (currentUnit.CurrentActionType)
+            switch (unit.CurrentActionType)
             {
                 case UnitActionType.Attacking:
                     OpenUnitAttackMenu();
@@ -116,9 +169,11 @@ namespace UI
             }
         }
 
-        public void OpenUnitMenu(IUnitData unit)
+        public void OpenUnitMenu()
         {
-            currentUnit = unit;
+            var unit = CurrentUnit;
+            if (unit == null)
+                return;
             
             CloseAllPanels();
             unitPanel.SetActive(true);
@@ -135,17 +190,18 @@ namespace UI
 
         public void OpenPlayerMenu(Player player)
         {
-            CloseAllPanels();
-            var currEntity = player.TurnState.GetCurrent();
-            if (currEntity is IUnitData unit)
-            {
-                OpenUnitMenu(unit);
-            }
+            currentPlayer = player;
+            currentEntity = player.TurnState.GetCurrent();
+            // var currEntity = player.TurnState.GetCurrent();
+            // if (currEntity is IUnitData unit)
+            // {
+            // OpenUnitMenu();
+            // }
         }
 
         public void HandleUnitChosen(IUnitData unit)
         {
-            OpenUnitMenu(unit);
+            // OpenUnitMenu();
         }
         
         public void HandleEndButtonClicked()

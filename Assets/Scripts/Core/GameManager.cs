@@ -132,6 +132,7 @@ namespace Core
                 if (current is IUnitData unit)
                     ShowUnitPaths(unit);
             }
+            gameUI.OpenPlayerMenu(CurrentPlayer);
             Debug.Log($"Player {currentPlayerIndex + 1} turns");
         }
 
