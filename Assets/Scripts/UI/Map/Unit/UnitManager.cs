@@ -11,7 +11,7 @@ namespace UI.Map.Unit
 {
     public class UnitManager: MonoBehaviour
     {
-        [SerializeField] public IUnitData _data;
+        private IUnitData _data;
         private GameObject _obj;
         private SpriteRenderer _character;
         private SpriteRenderer _characterShadow;
@@ -35,6 +35,7 @@ namespace UI.Map.Unit
         {
             _data = data;
             _obj = obj;
+            _data.Object = _obj;
             _settingsManager = settingsManager;
             _data.MovementCosts = _settingsManager.hexMovementWeights[_data.UnitType].ToDictionary();
             

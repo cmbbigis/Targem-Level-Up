@@ -6,6 +6,6 @@
         Rock = 1,
         Gold = 2,
         Food = 3,
-        Crystals = 4
+        Clay = 4
     }
 }

@@ -1,6 +1,8 @@
-﻿namespace Resources.Models.Resource
+﻿using Core;
+
+namespace Resources.Models.Resource
 {
-    public interface IResourceData
+    public interface IResourceData: IEntity
     {
         ResourceType Type { get; }
         int Quantity { get; set; }

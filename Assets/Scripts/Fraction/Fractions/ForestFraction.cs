@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Map.Models.Terrain;
+using UnityEngine;
 
 namespace Fraction.Fractions
 {
@@ -7,6 +8,7 @@ namespace Fraction.Fractions
         public ForestFaction() : base("Forest Sentinels", "Guardians of the ancient woods.", Color.green, 7, 7, 4)
         {
             Type = FractionType.Forest;
+            TerrainType = TerrainType.Forest;
             AddModifier("ForestStealth", 0.15f); // Улучшенная скрытность в лесах
         }
     }

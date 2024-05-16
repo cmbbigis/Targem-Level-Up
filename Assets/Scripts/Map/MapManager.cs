@@ -11,6 +11,7 @@ using Resources.Models.Resource;
 using UI.Map.Grid;
 using Units.Models.Unit;
 using UnityEngine;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 namespace Map
@@ -55,7 +56,7 @@ namespace Map
                 _gridManager.MoveUnitTo(h.Unit, h.Cords);
         }
 
-        // CAMERA
+        #region CAMERA
         public void MoveCamera(Vector3 diff) =>
             _gridManager.MoveCamera(diff);
         public void ZoomCamera(float diff) =>
@@ -73,8 +74,10 @@ namespace Map
             else if (entity is IHexData hex)
                 FocusOnHex(hex);
         }
+        #endregion
+        
+        #region MAP
 
-        // MAP
         public void MakeMap(IPlayerData[] players) =>
             GenerateMap(players);
         public IHexData GetHexagonAt(Vector2 cords) => _hexes.TryGetValue(cords, out var hex) ? hex : null;
@@ -82,18 +85,6 @@ namespace Map
         public IHexData GetHexagonAt(int x, int y) => GetHexagonAt(new Vector2(x, y));
         public IHexData SetHexagonAt(Vector2 cords, IHexData hex) => _hexes[cords] = hex;
         public IHexData SetHexagonAt(int x, int y, IHexData hex) => SetHexagonAt(new Vector2(x, y), hex);
-        private void MakeSimpleRandomMap()
-        {
-            for (var y = 0; y < Height; y++)
-            {
-                for (var x = 0; x < Width; x++)
-                {
-                    var data = new HexData(x, y, (TerrainType) _rand.Next(0, 3));
-                    InitHexAt(data, new Vector2(x, y));
-                }
-            }
-            FillEmpty();
-        }
 
         public void GenerateMap(IPlayerData[] players)
         {
@@ -102,16 +93,70 @@ namespace Map
             
             PlaceCitiesAndInitialBiomes(players);
             
-            for (int x = 0; x < Width; x++)
+            for (var x = 0; x < Width; x++)
             {
-                for (int y = 0; y < Height; y++)
+                for (var y = 0; y < Height; y++)
                 {
-                    if (GetHexagonAt(x, y) == null)
+                    if (GetHexagonAt(x, y) != null)
+                        continue;
+
+                    var noise = Mathf.PerlinNoise((x + seedX) * 0.1f, (y + seedY) * 0.1f);
+                    var (terrain, z) = DetermineTerrainByNoise(noise);
+                    InitHexAt(new HexData(x, y, terrain, z), new Vector2(x, y));
+                }
+            }
+
+            PlaceResources();
+        }
+
+        private void PlaceResources()
+        {
+            var availableHexesForResources = new Dictionary<TerrainType, List<IHexData>>();
+
+            // Собрать все доступные гексы по типу территории
+            for (var x = 0; x < Width; x++)
+            {
+                for (var y = 0; y < Height; y++)
+                {
+                    var hex = GetHexagonAt(x, y);
+                    if (hex.Resource == null) // Убедиться, что гекс еще не занят другим ресурсом
                     {
-                        var noise = Mathf.PerlinNoise((x + seedX) * 0.1f, (y + seedY) * 0.1f);
-                        var (terrain, z) = DetermineTerrainByNoise(noise);
-                        InitHexAt(new HexData(x, y, terrain, z), new Vector2(x, y));
+                        if (!availableHexesForResources.ContainsKey(hex.Terrain))
+                            availableHexesForResources[hex.Terrain] = new List<IHexData>();
+                
+                        availableHexesForResources[hex.Terrain].Add(hex);
                     }
+                }
+            }
+
+            // Распределить ресурсы по доступным гексам
+            foreach (var biome in _gameSettingsManager.biomeResources)
+            {
+                if (availableHexesForResources.TryGetValue(biome.Key, out var hexList))
+                {
+                    foreach (var resourceType in biome.Value)
+                    {
+                        var count = _gameSettingsManager.resourcesCount[resourceType];
+
+                        for (var i = 0; i < count; i++)
+                        {
+                            if (hexList.Count == 0)
+                            {
+                                Debug.LogWarning($"Not enough hexes to place all resources of type {resourceType} in biome {biome.Key}");
+                                break; // Прекратить распределение ресурсов, если места не хватает
+                            }
+
+                            var hexIndex = Random.Range(0, hexList.Count);
+                            var selectedHex = hexList[hexIndex];
+                            selectedHex.Resource = new ResourceData{Type = resourceType}; // Создать новый объект ресурса
+                            _gridManager.ReinitHexAtCords(selectedHex.Cords);
+                            hexList.RemoveAt(hexIndex); // Удалить гекс из списка доступных, чтобы избежать повторения
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"No available hexes found for biome {biome.Key}");
                 }
             }
         }
@@ -134,9 +179,6 @@ namespace Map
             }
 
             return (types[0], noiseVal / _gameSettingsManager.biomeWeights[types[0]]);
-            
-            var idx = (int) Math.Floor(noiseVal * types.Length);
-            return (types[idx], noiseVal * types.Length - idx);
         }
 
         private void PlaceCitiesAndInitialBiomes(IPlayerData[] players)
@@ -200,19 +242,6 @@ namespace Map
             return bestPosition;
         }
 
-        private void FillEmpty()
-        {
-            for (var x = -1; x <= Width; x++)
-            {
-                InitHexAt(new HexData(x, -1, TerrainType.Ocean), new Vector2(x, -1f));
-                InitHexAt(new HexData(x, Height, TerrainType.Ocean), new Vector2(x, Height));
-            }
-            for (var y = -1; y <= Height; y++)
-            {
-                InitHexAt(new HexData(-1, y, TerrainType.Ocean), new Vector2(-1, y));
-                InitHexAt(new HexData(Width, y, TerrainType.Ocean), new Vector2(Width, y));
-            }
-        }
         private void InitHexAt(IHexData hexData, Vector2 cords)
         {
             _gridManager.InitHexAtCords(cords, hexData);
@@ -239,7 +268,9 @@ namespace Map
             }
         }
         
-        // PATHFINDING
+        #endregion
+
+        #region PATHFINDING
         private bool IsCordsValid(Vector2 cords) => 0 <= cords.x && cords.x < Width && 0 <= cords.y && cords.y < Height;
         private List<IHexData> GetNeighbours(IHexData hex)
         {
@@ -254,8 +285,33 @@ namespace Map
         {
             throw new NotImplementedException();
         }
+        
+        public List<IHexData> GetHexesWithinDistance(IHexData start, float n)
+        {
+            var result = new List<IHexData>();
+            var queue = new Queue<IHexData>();
+            var visited = new Dictionary<IHexData, bool>();
 
-        private Dictionary<IHexData, UnitPath> FindUnitPaths(IUnitData unit, float maxDistance)
+            queue.Enqueue(start);
+            visited[start] = true;
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                result.Add(current);
+
+                foreach (var neighbor in GetNeighbours(current)
+                             .Where(neighbor => !visited.ContainsKey(neighbor) && Vector3.Distance(neighbor.Cords, start.Cords) <= n))
+                {
+                    visited[neighbor] = true;
+                    queue.Enqueue(neighbor);
+                }
+            }
+
+            return result;
+        }
+
+        public Dictionary<IHexData, UnitPath> FindUnitPaths(IUnitData unit, float maxDistance)
         {
             var distances = new Dictionary<IHexData, float>();
             var previous = new Dictionary<IHexData, UnitPath>();
@@ -313,7 +369,17 @@ namespace Map
         }
         public IEnumerable<IHexData> FindPossibleHexes(IUnitData unit) =>
             FindUnitPaths(unit, unit.MovementInfo.MovesLeft).Keys;
-        private List<ResourcePath> FindResourcePaths(IHexData source, IHexData destination, int maxPaths)
+        public IEnumerable<IEntity> FindPossibleAttackTargets(IUnitData unit, Attack attack)
+        {
+            return GetHexesWithinDistance(unit.Hex, attack.Range)
+                   .Where(x => x.Unit != null || x.City != null || x.Resource != null && x.Resource.Level > 0)
+                   .Select(x => x.Unit != null
+                               ? (IEntity) x.Unit
+                               : x.City != null
+                                   ? x.City
+                                   : x.Resource);
+        }
+        public List<ResourcePath> FindResourcePaths(IHexData source, IHexData destination, int maxPaths)
         {
             var paths = new List<ResourcePath>();
             var pathQueue = new List<ResourcePath> {new() { Hexes = new List<IHexData> { source }, Capacity = float.MaxValue }};
@@ -351,8 +417,9 @@ namespace Map
 
             return paths;
         }
+        #endregion
         
-        //UNITS
+        #region UNITS
         public bool PlaceUnitAt(IUnitData unit, IHexData hex)
         {
             if (!unit.CanStayOn(hex))
@@ -361,7 +428,7 @@ namespace Map
             unit.Hex = hex;
             return true;
         }
-        private (bool, UnitPath) CanMoveUnitTo(IUnitData unit, IHexData hex)
+        public (bool, UnitPath) CanMoveUnitTo(IUnitData unit, IHexData hex)
         {
             var possiblePaths = FindUnitPaths(unit, unit.MovementInfo.MovesLeft);
             if (!unit.CanStayOn(hex) || !possiblePaths.Keys.Contains(hex))
@@ -375,6 +442,11 @@ namespace Map
                 return false;
             return unit.MoveTo(hex, path.TotalDistance);
         }
+
+        public bool UnitCanHarvest(IUnitData unit)
+            => unit.Hex.Resource != null && unit.BuildingPower > 0;
+
+        #endregion
     }
     
     public class ResourcePath

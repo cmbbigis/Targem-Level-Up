@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Core;
 using Map.Models.Hex;
 using Map.Models.Terrain;
@@ -25,7 +26,7 @@ namespace Units.Models.Unit
 
     public class UnitData : IUnitData
     {
-        public UnitData(IPlayerData master, UnitType unitType, int healthPoints, int defense, ICollection<Attack> attacks, int movementRange, HashSet<TerrainType> allowedTerrainTypes, float buildingPower)
+        public UnitData(IPlayerData master, UnitType unitType, int healthPoints, int defense, List<Attack> attacks, int movementRange, HashSet<TerrainType> allowedTerrainTypes, float buildingPower)
         {
             Master = master;
             UnitType = unitType;
@@ -35,9 +36,15 @@ namespace Units.Models.Unit
             AllowedTerrainTypes = allowedTerrainTypes;
             MovementInfo = new MovementInfo {MovesLeft = MovementRange};
             Attacks = attacks;
+            CurrentActionType = UnitActionType.Moving;
+            CurrentAttack = Attacks.FirstOrDefault();
             BuildingPower = buildingPower;
             MovementCosts = new Dictionary<TerrainType, float>();
         }
+        
+        public GameObject Object { get; set; }
+
+        public Sprite Sprite => Object.GetComponentsInChildren<SpriteRenderer>()[0].sprite;
 
         // MASTER
         public IPlayerData Master { get; }
@@ -69,11 +76,15 @@ namespace Units.Models.Unit
                 return int.MaxValue;  // Если местность не подходит или занята другим юнитом
             return MovementCosts.GetValueOrDefault(hex.Terrain, 1);  // Возвращаем базовую стоимость, если специальное значение не задано
         }
-        
+
+        // TURN STATE
+        public UnitActionType CurrentActionType { get; set; }
+        public Attack CurrentAttack { get; set; }
+
         // ATTACKING
         public float HealthPoints { get; set; }
         public float Defense { get; set; }
-        public ICollection<Attack> Attacks { get; set; }
+        public List<Attack> Attacks { get; set; }
         public bool IsAlive => HealthPoints > 0.001;
         public bool CanAttack(Attack attack, IUnitData target)
         {

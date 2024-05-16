@@ -54,7 +54,7 @@ namespace UI
             _unitManagers.Remove(manager);
             manager.onUnitClicked.RemoveListener(HandleUnitClicked);
         }
-        
+
         private void HandleUnitClicked(IUnitData unit)
         {
             _gameManager.HandleUnitClicked(unit);

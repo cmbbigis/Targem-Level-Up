@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Map.Models.Terrain;
+using UnityEngine;
 
 namespace Fraction.Fractions
 {
@@ -7,6 +8,7 @@ namespace Fraction.Fractions
         public MountainFaction() : base("Mountain Lords", "Masters of the high peaks and deep halls.", Color.gray, 10, 5, 3)
         {
             Type = FractionType.Mountain;
+            TerrainType = TerrainType.Mountain;
             AddModifier("MountainCombatBonus", 0.2f); // Бонус к бою в горах
         }
     }

@@ -22,14 +22,14 @@ namespace Core
         [SerializeField]
         public FractionType[] playerFractions;
         
+        [SerializedDictionary]
+        public SerializedDictionary<FractionType, SerializedDictionary<ResourceType, float>> fractionStartResources;
+        
         [SerializeField]
         public string[] playerNames;
         
         [SerializedDictionary("TerrainType", "Weight")]
         public SerializedDictionary<TerrainType, int> biomeWeights;
-
-        [SerializeField]
-        public int resourceCount;
 
         [SerializedDictionary]
         public SerializedDictionary<TerrainType, List<ResourceType>> biomeResources;

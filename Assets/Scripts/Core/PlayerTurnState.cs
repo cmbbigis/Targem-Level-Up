@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
+using Units.Models.Unit;
 using Unity.VisualScripting;
 using UnityEditor.UI;
 using UnityEngine;
@@ -9,6 +10,19 @@ namespace Core
 {
     public class PlayerTurnState
     {
+        public readonly Dictionary<IUnitData, Attack> UnitCurrentAttacks = new();
+
+        public void SetUnitCurrentAttack(IUnitData unit, Attack attack) =>
+            UnitCurrentAttacks[unit] = attack;
+        
+        public Attack GetUnitCurrentAttack(IUnitData unit)
+        {
+            if (UnitCurrentAttacks.TryGetValue(unit, out var attack))
+                return attack;
+            SetUnitCurrentAttack(unit, unit.Attacks.FirstOrDefault());
+            return UnitCurrentAttacks[unit];
+        }
+
         public readonly HashSet<IEntity> ChosenEntities = new();
 
         public void StartTurn()
