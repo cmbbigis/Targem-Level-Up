@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Cities.Models.City;
 using Common;
@@ -148,8 +149,13 @@ namespace UI
             unitActionMenu.SetActive(true);
             
             unitActionDropdown.ClearOptions();
-            unitActionDropdown.AddOptions(EnumExtensions.GetValues<UnitActionType>().Select(x => new TMP_Dropdown.OptionData(x.ToString())).ToList());
-            unitActionDropdown.SetValueWithoutNotify((int) unit.CurrentActionType);
+            var options = new List<String> {UnitActionType.Moving.ToString()};
+            if (unit.Attacks.Count > 0)
+                options.Add(UnitActionType.Attacking.ToString());
+            if (unit.BuildingPower > 0)
+                options.Add(UnitActionType.Building.ToString());
+            unitActionDropdown.AddOptions(options);
+            unitActionDropdown.SetValueWithoutNotify(options.IndexOf(unit.CurrentActionType.ToString()));
             
             CloseAllUnitMenus();
 
@@ -191,7 +197,6 @@ namespace UI
         public void OpenPlayerMenu(Player player)
         {
             currentPlayer = player;
-            currentEntity = player.TurnState.GetCurrent();
             // var currEntity = player.TurnState.GetCurrent();
             // if (currEntity is IUnitData unit)
             // {
@@ -217,7 +222,10 @@ namespace UI
 
         public void HandleActionDropdownClicked(TMP_Dropdown change)
         {
-            gameManager.HandleActionDropdownClicked(change.value);
+            var type = 0;
+            if (Enum.TryParse(change.options[change.value].text, out UnitActionType i))
+                type = (int) i;
+            gameManager.HandleActionDropdownClicked(type);
             OpenUnitActionMenu();
         }
     }

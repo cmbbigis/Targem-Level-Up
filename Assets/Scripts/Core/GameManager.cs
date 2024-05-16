@@ -179,6 +179,18 @@ namespace Core
                     throw new ArgumentOutOfRangeException();
             }
         }
+
+        private void ChooseUnit(IUnitData unit)
+        {
+            CurrentPlayer.TurnState.ClearHighlightedEntity();
+            CurrentPlayer.TurnState.SetChosenEntity(unit);
+            if (unit.CurrentActionType == UnitActionType.Moving)
+                ShowUnitPaths(unit);
+            else if (unit.CurrentActionType == UnitActionType.Attacking)
+                ShowUnitTargets(unit, unit.CurrentAttack);
+            else
+                Debug.Log("building");
+        }
         
         public void HandleUnitClicked(IUnitData unit)
         {
@@ -189,25 +201,22 @@ namespace Core
             }
             else if (CurrentPlayerData.Units.Contains(unit))
             {
-                CurrentPlayer.TurnState.SetChosenEntity(unit);
-                if (unit.CurrentActionType == UnitActionType.Moving)
-                    ShowUnitPaths(unit);
-                else if (unit.CurrentActionType == UnitActionType.Attacking)
-                    ShowUnitTargets(unit, unit.CurrentAttack);
-                else
-                    Debug.Log("building");
+                ChooseUnit(unit);
             }
             else if (CurrentPlayer.TurnState.GetCurrent() is IUnitData curUnit)
             {
                 if (CurrentPlayerData.Units.Contains(curUnit))
                 {
-                    curUnit.Attack(curUnit.CurrentAttack, unit);
+                    if (curUnit.CanAttack(curUnit.CurrentAttack, unit))
+                        curUnit.Attack(curUnit.CurrentAttack, unit);
+                    else
+                        ChooseUnit(unit);
                 }
             }
             else
             {
-                CurrentPlayer.TurnState.SetChosenEntity(unit);
-                ShowUnitPaths(unit);
+                // CurrentPlayer.TurnState.SetChosenEntity(unit);
+                // ShowUnitPaths(unit);
             }
             
             gameUI.HandleUnitChosen(unit);
@@ -221,6 +230,7 @@ namespace Core
                 {
                     ShowUnitPaths(unit);
                 }
+                
             }
             else if (CurrentPlayer.TurnState.GetCurrent() is IHexData curHex)
             {
