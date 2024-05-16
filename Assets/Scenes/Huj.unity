@@ -4576,9 +4576,9 @@ MonoBehaviour:
   hexCitySprites:
     _serializedList:
     - Key: 0
-      Value: {fileID: 21300000, guid: 53963a47d32ddd74abbef6917e7dd4f7, type: 3}
+      Value: {fileID: 21300000, guid: 060c0a1bd09d7c64aa2d48ad9cad4e46, type: 3}
     - Key: 2
-      Value: {fileID: 21300000, guid: 756c1f335d6d49d4294ffdae4b256918, type: 3}
+      Value: {fileID: 21300000, guid: 3eb6097dd09e7c24893eb4b61fd84a07, type: 3}
   resourceHexSprites:
     _serializedList:
     - Key: 0
@@ -4625,10 +4625,7 @@ MonoBehaviour:
           - {fileID: 21300000, guid: 5a2cab96c43727042bf8aa9668379ffb, type: 3}
     - Key: 1
       Value:
-        _serializedList:
-        - Key: 0
-          Value:
-          - {fileID: 0}
+        _serializedList: []
     - Key: 3
       Value:
         _serializedList:
@@ -4643,10 +4640,7 @@ MonoBehaviour:
           - {fileID: 0}
     - Key: 6
       Value:
-        _serializedList:
-        - Key: 0
-          Value:
-          - {fileID: 0}
+        _serializedList: []
   miningBuildingHexSprites:
     _serializedList:
     - Key: 2
@@ -4654,13 +4648,37 @@ MonoBehaviour:
         _serializedList:
         - Key: 1
           Value:
-          - {fileID: 21300000, guid: 34589bbb500da3842b931721b585ecb6, type: 3}
+          - {fileID: 21300000, guid: aad80d817c490054d9f97d6f104d476a, type: 3}
+        - Key: 2
+          Value:
+          - {fileID: 21300000, guid: 20a7cde3a02a8604f8140e6f879e6aa7, type: 3}
     - Key: 0
       Value:
         _serializedList:
         - Key: 0
           Value:
-          - {fileID: 21300000, guid: c1a8435859591804791b5e18632b4c31, type: 3}
+          - {fileID: 21300000, guid: 42f839946c5172542ae206f77455b91d, type: 3}
+        - Key: 3
+          Value:
+          - {fileID: 21300000, guid: a0a481d89074ba1458feb2b872fc6d4e, type: 3}
+    - Key: 7
+      Value:
+        _serializedList:
+        - Key: 3
+          Value:
+          - {fileID: 21300000, guid: 1c9c7436611637247b6c61bd28e09388, type: 3}
+    - Key: 4
+      Value:
+        _serializedList:
+        - Key: 3
+          Value:
+          - {fileID: 21300000, guid: a3ea57b3090dcc744a3b68675c4dadde, type: 3}
+        - Key: 0
+          Value:
+          - {fileID: 21300000, guid: c72aeb2425a855e46b7ec8c830f20d83, type: 3}
+        - Key: 4
+          Value:
+          - {fileID: 21300000, guid: dfc23808d8e652641982a39109eb1860, type: 3}
 --- !u!4 &3595789438959913324
 Transform:
   m_ObjectHideFlags: 0
