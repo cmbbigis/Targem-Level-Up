@@ -187,69 +187,135 @@ namespace Core
 
         private void ChooseUnit(IUnitData unit)
         {
+            if (!CurrentPlayerData.Units.Contains(unit))
+            {
+                Debug.Log("Tried to choose not your unit");
+                return;
+            }
             CurrentPlayer.TurnState.ClearHighlightedEntity();
             CurrentPlayer.TurnState.SetChosenEntity(unit);
             if (unit.CurrentActionType == UnitActionType.Moving)
                 ShowUnitPaths(unit);
             else if (unit.CurrentActionType == UnitActionType.Attacking)
                 ShowUnitTargets(unit, unit.CurrentAttack);
-            else
-                Debug.Log("building");
+            // else
+                // Debug.Log("building");
+            gameUI.HandleUnitChosen(unit);
+        }
+
+        private void UnchooseUnit(IUnitData unit)
+        {
+            CurrentPlayer.TurnState.PopChosenEntity(unit);
+            CurrentPlayer.TurnState.ClearHighlightedEntity();
         }
 
         public void HandleUnitClicked(IUnitData unit)
         {
-            if (CurrentPlayer.TurnState.ChosenEntities.Contains(unit))
+            if (CurrentPlayer.TurnState.GetCurrent() != null)
             {
-                CurrentPlayer.TurnState.PopChosenEntity(unit);
-                CurrentPlayer.TurnState.ClearHighlightedEntity();
-            }
-            else if (CurrentPlayerData.Units.Contains(unit))
-            {
-                ChooseUnit(unit);
-            }
-            else if (CurrentPlayer.TurnState.GetCurrent() is IUnitData curUnit)
-            {
-                if (CurrentPlayerData.Units.Contains(curUnit))
+                var current = CurrentPlayer.TurnState.GetCurrent();
+                if (current is IUnitData curUnit)
                 {
-                    if (curUnit.CanAttack(curUnit.CurrentAttack, unit))
-                        curUnit.Attack(curUnit.CurrentAttack, unit);
+                    if (unit == curUnit)
+                        UnchooseUnit(unit);
+                    else if (CurrentPlayerData.Units.Contains(curUnit))
+                    {
+                        if (curUnit.CanAttack(curUnit.CurrentAttack, unit))
+                            curUnit.Attack(curUnit.CurrentAttack, unit);
+                    }
                     else
                         ChooseUnit(unit);
                 }
+                else
+                    ChooseUnit(unit);
             }
             else
             {
-                // CurrentPlayer.TurnState.SetChosenEntity(unit);
-                // ShowUnitPaths(unit);
+                ChooseUnit(unit);
             }
-
-            gameUI.HandleUnitChosen(unit);
         }
 
+        private void ChooseHex(IHexData hex)
+        {
+            CurrentPlayer.TurnState.SetChosenEntity(hex);
+            mapManager.FocusOnHex(hex);
+            gameUI.HandleHexChosen(hex);
+        }
+
+        private void UnchooseHex(IHexData hex)
+        {
+            CurrentPlayer.TurnState.PopChosenEntity(hex);
+            CurrentPlayer.TurnState.ClearHighlightedEntity();
+        }
+        
         public void HandleHexClicked(IHexData hex)
         {
             if (CurrentPlayer.TurnState.GetCurrent() != null)
             {
-                if (CurrentPlayer.TurnState.GetCurrent() is IUnitData unit && CurrentPlayerData.Units.Contains(unit))
+                var current = CurrentPlayer.TurnState.GetCurrent();
+                if (current is IUnitData unit)
                 {
-                    if (mapManager.MoveUnitTo(unit, hex))
+                    if (CurrentPlayerData.Units.Contains(unit))
                     {
-                        ShowUnitPaths(unit);
+                        var (canMoveTo, path) = mapManager.CanMoveUnitTo(unit, hex);
+                        if (canMoveTo)
+                        {
+                            if (mapManager.MoveUnitTo(unit, hex))
+                                ShowUnitPaths(unit);
+                        }
+                        else
+                            ChooseHex(hex);
                     }
-                }
-                else if (CurrentPlayer.TurnState.GetCurrent() is IHexData curHex)
-                {
-                    mapManager.FocusOnHex(hex);
-                    if (CurrentPlayer.TurnState.ChosenEntities.Contains(hex))
-                        CurrentPlayer.TurnState.PopChosenEntity(hex);
                     else
-                        CurrentPlayer.TurnState.SetChosenEntity(hex);
+                        ChooseHex(hex);
                 }
+                else if (current is IHexData curHex)
+                {
+                    if (hex == curHex)
+                        UnchooseHex(hex);
+                    else if (curHex.Resource != null)
+                    {
+                        var resource = curHex.Resource;
+                        if (resource.IntLevel > 0)
+                        {
+                            if (hex.City != null)
+                            {
+                                var hexCity = hex.City;
+                                if (resource.ConnectedCity != null)
+                                {
+                                    var connectedCity = resource.ConnectedCity;
+                                    if (connectedCity == hexCity)
+                                    {
+                                        resource.DisconnectCity();
+                                        CurrentPlayer.TurnState.ClearHighlightedEntity();
+                                    }
+                                    else
+                                    {
+                                        resource.ConnectCity(hexCity);
+                                        CurrentPlayer.TurnState.ClearHighlightedEntity();
+                                    }
+                                }
+                                else
+                                {
+                                    resource.ConnectCity(hex.City);
+                                    CurrentPlayer.TurnState.ClearHighlightedEntity();
+                                }
+                            }
+                            else
+                                ChooseHex(hex);
+                        }
+                        else
+                            ChooseHex(hex);
+                    }
+                    else
+                        ChooseHex(hex);
+                }
+                else
+                    ChooseHex(hex);
             }
             else
             {
-                CurrentPlayer.TurnState.SetChosenEntity(hex);
+                ChooseHex(hex);
                 if (hex.Resource != null && hex.Resource.IntLevel > 0)
                 {
                     var resource = hex.Resource;
@@ -257,6 +323,10 @@ namespace Core
                     {
                         ShowResourcePaths(resource);
                     }
+                }
+                else if (hex.City != null)
+                {
+                    
                 }
             }
         }

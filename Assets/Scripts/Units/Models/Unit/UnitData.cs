@@ -51,7 +51,7 @@ namespace Units.Models.Unit
         public Sprite Sprite => Object.GetComponentsInChildren<SpriteRenderer>()[0].sprite;
 
         // MASTER
-        public IPlayerData Master { get; }
+        public IPlayerData Master { get; set; }
 
         // TYPING
         public UnitType UnitType { get; }
@@ -103,7 +103,7 @@ namespace Units.Models.Unit
             // }
                 
             var distance = Vector3.Distance(Hex.Cords, target.Hex.Cords);
-            return target != this &&  MovementInfo.MovesLeft >= attack.Volume && distance <= attack.Range;
+            return CurrentActionType == UnitActionType.Attacking && target != this && target.Master != Master &&  MovementInfo.MovesLeft >= attack.Volume && distance <= attack.Range;
         }
         public bool Attack(Attack attack, IAttackable target)
         {

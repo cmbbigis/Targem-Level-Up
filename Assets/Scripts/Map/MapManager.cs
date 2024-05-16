@@ -4,7 +4,6 @@ using System.Linq;
 using Cities.Models.City;
 using Common;
 using Core;
-using JetBrains.Annotations;
 using Map.Models.Hex;
 using Map.Models.Map;
 using Map.Models.Terrain;
@@ -13,7 +12,6 @@ using Resources.Models.Resource;
 using UI.Map.Grid;
 using Units.Models.Unit;
 using UnityEngine;
-using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 namespace Map
@@ -209,9 +207,10 @@ namespace Map
                 var city = new CityData
                 {
                     Hex = cityData,
+                    Master = players[i]
                 };
-                players[i].AddCity(city);
                 cityData.City = city;
+                players[i].AddCity(city);
                 InitHexAt(cityData, cityLocation);
 
                 // Создание стартового биома вокруг города
@@ -221,6 +220,8 @@ namespace Map
                     {
                         var nx = (int)cityLocation.x + dx;
                         var ny = (int)cityLocation.y + dy;
+                        if (GetHexagonAt(nx, ny) != null)
+                            continue;
                         if (nx >= 0 && nx < Width && ny >= 0 && ny < Height)
                         {
                             var noise = Mathf.PerlinNoise((nx + seedX), (ny + seedY));

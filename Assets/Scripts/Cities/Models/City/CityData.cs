@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Cities.Models.Buildings;
 using Map.Models.Hex;
+using Players.Models.Player;
 using Resources.Models.Resource;
 
 namespace Cities.Models.City
@@ -10,11 +11,18 @@ namespace Cities.Models.City
         public string Name { get; set; }
         public List<IResourceData> ConnectedResources { get; set; }
         public IHexData Hex { get; set; }
+        public IPlayerData Master { get; set; }
         public float HealthPoints { get; set; }
         public float Defense { get; set; }
         public float GetDefensiveAbilitiesModifier()
             => 1;
 
+        public CityData()
+        {
+            ConnectedResources = new();
+            
+        }
+        
         public void Die()
         {
             throw new System.NotImplementedException();

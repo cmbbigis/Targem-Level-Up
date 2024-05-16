@@ -9,7 +9,7 @@ namespace Units.Models.Unit.Units
         public Builder(IPlayerData master) 
             : base(
                 master, 
-                UnitType.Infantry, 
+                UnitType.Builder, 
                 20, 
                 5, 
                 new List<Attack>

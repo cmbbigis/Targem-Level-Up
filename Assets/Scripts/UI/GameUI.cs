@@ -215,6 +215,11 @@ namespace UI
             OpenUnitActionMenu();
         }
 
+        public void OpenHexMenu()
+        {
+            
+        }
+
         public void OpenPlayerMenu(Player player)
         {
             currentPlayer = player;
@@ -227,7 +232,12 @@ namespace UI
 
         public void HandleUnitChosen(IUnitData unit)
         {
-            // OpenUnitMenu();
+            OpenUnitMenu();
+        }
+        
+        public void HandleHexChosen(IHexData hex)
+        {
+            OpenHexMenu();
         }
         
         public void HandleEndButtonClicked()

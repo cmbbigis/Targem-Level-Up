@@ -19,9 +19,6 @@ namespace Units.Models.Unit
         GameObject Object { get; set; }
         Sprite Sprite { get; }
 
-        // MASTER
-        IPlayerData Master { get; }
-
         // TYPING
         UnitType UnitType { get; }
         
@@ -39,15 +36,12 @@ namespace Units.Models.Unit
 
         // ATTACKING
         float StartHealthPoints { get; set; }
-        float Defense { get; set; }
         List<Attack> Attacks { get; set; }
         bool IsAlive { get; }
         bool CanAttack(Attack attack, IAttackable target);
         bool Attack(Attack attack, IAttackable target);
-        void Die();
         float CalculateDamage(Attack attack, IUnitData attacker, IAttackable defender);
         float GetSpecialAbilitiesModifier() => 1.0f;
-        float GetDefensiveAbilitiesModifier() => 1.0f;
         float GetTerrainModifier(TerrainType attackerTerrain, TerrainType defenderTerrain);
         
         // BUILDING

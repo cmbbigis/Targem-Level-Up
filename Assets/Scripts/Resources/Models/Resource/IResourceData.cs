@@ -7,6 +7,8 @@ namespace Resources.Models.Resource
     {
         ResourceType Type { get; }
         ICityData ConnectedCity { get; set; }
+        void ConnectCity(ICityData city);
+        void DisconnectCity();
         int Quantity { get; set; }
         float Level { get; set; }
         int IntLevel { get; }
