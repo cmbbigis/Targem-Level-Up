@@ -29,6 +29,8 @@ namespace Units.Models.Unit
 
     public class UnitData : IUnitData
     {
+        private static readonly int AttackFlg = Animator.StringToHash("AttackFlg");
+
         public UnitData(IPlayerData master, UnitType unitType, int healthPoints, int defense, List<Attack> attacks, int movementRange, HashSet<TerrainType> allowedTerrainTypes, float buildingPower)
         {
             Master = master;
@@ -49,6 +51,8 @@ namespace Units.Models.Unit
         public GameObject Object { get; set; }
 
         public Sprite Sprite => Object.GetComponentsInChildren<SpriteRenderer>()[0].sprite;
+
+        public Animator Animator => Object.GetComponent<Animator>();
 
         // MASTER
         public IPlayerData Master { get; }
@@ -109,6 +113,7 @@ namespace Units.Models.Unit
         {
             if (!CanAttack(attack, target))
                 return false;
+            Animator.SetBool(AttackFlg, true);
             var damage = CalculateDamage(attack, this, target);
             target.HealthPoints -= damage;
             if (target.HealthPoints <= 0)
