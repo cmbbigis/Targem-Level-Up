@@ -4355,7 +4355,7 @@ MonoBehaviour:
     - Key: 0
       Value: 5
     - Key: 1
-      Value: 2
+      Value: 0
     - Key: 2
       Value: 4
     - Key: 3
@@ -4371,7 +4371,7 @@ MonoBehaviour:
   biomeResources:
     _serializedList:
     - Key: 0
-      Value: 00000000
+      Value: 0000000003000000
     - Key: 1
       Value: 
     - Key: 2
@@ -4379,7 +4379,7 @@ MonoBehaviour:
     - Key: 3
       Value: 
     - Key: 4
-      Value: 
+      Value: 000000000300000004000000
     - Key: 5
       Value: 
     - Key: 6
@@ -4512,60 +4512,67 @@ MonoBehaviour:
     _serializedList:
     - Key: 0
       Value:
-      - {fileID: 21300000, guid: 5996ca23bc6b6d7498034c18d1ba819b, type: 3}
-      - {fileID: 21300000, guid: ade306c5c414fcd49aa4b271481a94af, type: 3}
-      - {fileID: 21300000, guid: f16c1e600f415374b810fbf5d033eabf, type: 3}
-    - Key: 1
-      Value:
-      - {fileID: 21300000, guid: 6fd51014ddf601c44802262523c7a9c2, type: 3}
-      - {fileID: 21300000, guid: e4c9a3df859955d4e9408d1fe71b354e, type: 3}
-      - {fileID: 21300000, guid: 1c5b2d9b21898b347a63fd6afd83fadd, type: 3}
+      - {fileID: 21300000, guid: d06d348a93c97d2439864dee99b2c8de, type: 3}
     - Key: 2
       Value:
-      - {fileID: 21300000, guid: c4dd8e2db79112549a494d8ec7977f7f, type: 3}
-      - {fileID: 21300000, guid: 5348a9e8392d6ac4688ae45808aab394, type: 3}
-      - {fileID: 21300000, guid: 1a4f5c695d4ae4f4cb27d76ffebf9a9a, type: 3}
+      - {fileID: 21300000, guid: 32eb23990989f73438c5b22c0412508b, type: 3}
+      - {fileID: 21300000, guid: 5ba8830d0a067ee42a98426d7fd29c8a, type: 3}
+      - {fileID: 21300000, guid: 79495de92260f114a9925bd5159c20f6, type: 3}
+      - {fileID: 21300000, guid: 89a93b7455f9f77438ce96f8b51c99c5, type: 3}
     - Key: 3
       Value:
-      - {fileID: 21300000, guid: 6d5fb610685a48d49aca474bcded6f5c, type: 3}
-      - {fileID: 21300000, guid: 371ad144ea785f349ab502702ef775cb, type: 3}
+      - {fileID: 21300000, guid: 28f1384c05c22014db74b836d839e838, type: 3}
+      - {fileID: 21300000, guid: 74bc2ca8c2bf89d4893e6e92ab5c64c7, type: 3}
+      - {fileID: 21300000, guid: 3801805c434ed27469c0ad08e0105894, type: 3}
     - Key: 4
       Value:
-      - {fileID: 21300000, guid: 7bc37bf6c942be049b6ad70eab09f32c, type: 3}
-      - {fileID: 21300000, guid: 2efd3a215b25e91438f3fee73d94f860, type: 3}
-      - {fileID: 21300000, guid: 9803300f1c86822429f3d1ddeef0da0e, type: 3}
+      - {fileID: 21300000, guid: 69244b50029c016438d32645ef56168c, type: 3}
+      - {fileID: 21300000, guid: 36f688e626d44fc41961bdf26dff431f, type: 3}
+      - {fileID: 21300000, guid: 22ae3d6e4599c5c4183a3de7c0bbccbe, type: 3}
+      - {fileID: 21300000, guid: 19c49dd6576e7a7439c941c5c95bbd60, type: 3}
+      - {fileID: 21300000, guid: 074e3823bfe646349a8fbf0f79bcbae4, type: 3}
+      - {fileID: 21300000, guid: bc0bbebcda9056f4884cadd527947a58, type: 3}
+      - {fileID: 21300000, guid: ee1cec5e84b3315408555d781efc436e, type: 3}
+      - {fileID: 21300000, guid: d22a576a0564e294db3c3aef247dc71e, type: 3}
+      - {fileID: 21300000, guid: ffad5f8fc36eefe478aec5ca6f6cd531, type: 3}
+      - {fileID: 21300000, guid: 63f38cf5211398c468a803f8f95f52f5, type: 3}
+      - {fileID: 21300000, guid: 345563de54eef5742a4da379d781bd26, type: 3}
     - Key: 5
       Value:
-      - {fileID: 21300000, guid: f13a10480e49803448be9a89ae733a14, type: 3}
-      - {fileID: 21300000, guid: d563cebc2a0eb11469f871e429f4402c, type: 3}
-      - {fileID: 21300000, guid: 1784a36540ba6c344b9eb6b5e1e42a2c, type: 3}
+      - {fileID: 21300000, guid: e5eec84a5a5a08e4785df675e9f32b6c, type: 3}
+      - {fileID: 21300000, guid: 58d6bef6cbedc8c4e822fbcc2fda53b2, type: 3}
+      - {fileID: 21300000, guid: 7e30b6a3d3eb0bb4292f010cefe9a654, type: 3}
+      - {fileID: 21300000, guid: 1af66a5a01bb9584a857b7413f9870d6, type: 3}
     - Key: 6
       Value:
-      - {fileID: 21300000, guid: 5644acf0f2749f642bbf43ab934879f3, type: 3}
-      - {fileID: 21300000, guid: c5364b479eac23847951f70856b64b60, type: 3}
-      - {fileID: 21300000, guid: 5fcd15bdfd5a28d459e5a527b205b1ca, type: 3}
+      - {fileID: 21300000, guid: 90a7e08abc3d60a47ab11d6a80108831, type: 3}
+      - {fileID: 21300000, guid: ca9d1028f6db3d54885d87d375c1f78f, type: 3}
+      - {fileID: 21300000, guid: c26337eb6a5bb6d4295e2b55b8e45a7e, type: 3}
+      - {fileID: 21300000, guid: f972162a35aa2cb4984227414f6d5b8a, type: 3}
     - Key: 7
       Value:
-      - {fileID: 21300000, guid: cb6be61dab2978142a25e78446b19271, type: 3}
-      - {fileID: 21300000, guid: 48c325b851f360d41aeca83cb1ec1acb, type: 3}
+      - {fileID: 21300000, guid: 7eb03e29c01d82b44bf70c434bb4d229, type: 3}
+      - {fileID: 21300000, guid: 82a34a6aff0f66a4f8edda2fe86a9b38, type: 3}
+    - Key: 1
+      Value: []
   hexUnderSprites:
     _serializedList:
     - Key: 0
-      Value: {fileID: 21300000, guid: 50823798685c4064c849c596a47b8173, type: 3}
+      Value: {fileID: 21300000, guid: f7cb7f215a73ecb4a8c72ecc94a77736, type: 3}
     - Key: 1
-      Value: {fileID: 21300000, guid: 50823798685c4064c849c596a47b8173, type: 3}
+      Value: {fileID: 21300000, guid: f7cb7f215a73ecb4a8c72ecc94a77736, type: 3}
     - Key: 2
-      Value: {fileID: 21300000, guid: 50823798685c4064c849c596a47b8173, type: 3}
+      Value: {fileID: 21300000, guid: f7cb7f215a73ecb4a8c72ecc94a77736, type: 3}
     - Key: 3
-      Value: {fileID: 21300000, guid: 6a971a4b56628ba4c8ed9141e752aeff, type: 3}
+      Value: {fileID: 21300000, guid: 6c073679944c3d94799d412499d4e62f, type: 3}
     - Key: 4
-      Value: {fileID: 21300000, guid: f85096e0c547ac34c909f46f0d948e5b, type: 3}
+      Value: {fileID: 21300000, guid: f7cb7f215a73ecb4a8c72ecc94a77736, type: 3}
     - Key: 5
-      Value: {fileID: 21300000, guid: f85096e0c547ac34c909f46f0d948e5b, type: 3}
+      Value: {fileID: 21300000, guid: f7cb7f215a73ecb4a8c72ecc94a77736, type: 3}
     - Key: 6
-      Value: {fileID: 21300000, guid: 5c04150377fd6f64ba38caf74635a26f, type: 3}
+      Value: {fileID: 21300000, guid: f7cb7f215a73ecb4a8c72ecc94a77736, type: 3}
     - Key: 7
-      Value: {fileID: 21300000, guid: 50823798685c4064c849c596a47b8173, type: 3}
+      Value: {fileID: 21300000, guid: f7cb7f215a73ecb4a8c72ecc94a77736, type: 3}
   hexCitySprites:
     _serializedList:
     - Key: 0
@@ -4577,39 +4584,69 @@ MonoBehaviour:
     - Key: 0
       Value:
         _serializedList:
+        - Key: 3
+          Value:
+          - {fileID: 21300000, guid: 554e522efa6650f4eb731aac19926ea9, type: 3}
         - Key: 0
           Value:
-          - {fileID: 21300000, guid: 7082ff07ad9713d44aec02c023a18551, type: 3}
-    - Key: 1
+          - {fileID: 21300000, guid: d06d348a93c97d2439864dee99b2c8de, type: 3}
+    - Key: 4
       Value:
-        _serializedList: []
+        _serializedList:
+        - Key: 3
+          Value:
+          - {fileID: 21300000, guid: cd122698737fa8e48a16fc6258d5e11e, type: 3}
+        - Key: 0
+          Value:
+          - {fileID: 21300000, guid: 63f38cf5211398c468a803f8f95f52f5, type: 3}
+          - {fileID: 21300000, guid: 074e3823bfe646349a8fbf0f79bcbae4, type: 3}
+        - Key: 4
+          Value:
+          - {fileID: 21300000, guid: 2aea5b038654da242a3d5b97f66814f6, type: 3}
     - Key: 2
       Value:
         _serializedList:
         - Key: 1
           Value:
-          - {fileID: 21300000, guid: c2c233885ba392744ab37a1d4be6d195, type: 3}
+          - {fileID: 21300000, guid: dc6efc2ce9816364baeea1dc1a69f751, type: 3}
+          - {fileID: 21300000, guid: 42596b2fa008dbc4bb8ad0bd0783a385, type: 3}
+          - {fileID: 21300000, guid: a91becab5bfd76f4394c4487af921995, type: 3}
         - Key: 2
           Value:
-          - {fileID: 21300000, guid: 34589bbb500da3842b931721b585ecb6, type: 3}
-    - Key: 3
-      Value:
-        _serializedList: []
+          - {fileID: 21300000, guid: dc6efc2ce9816364baeea1dc1a69f751, type: 3}
+          - {fileID: 21300000, guid: 42596b2fa008dbc4bb8ad0bd0783a385, type: 3}
+          - {fileID: 21300000, guid: a91becab5bfd76f4394c4487af921995, type: 3}
     - Key: 7
       Value:
         _serializedList:
         - Key: 3
           Value:
-          - {fileID: 21300000, guid: aa1cd31f7c9f7584287552532fd4ce0b, type: 3}
-    - Key: 4
+          - {fileID: 21300000, guid: c8001098a6fc07947aa860ebe4ef4796, type: 3}
+          - {fileID: 21300000, guid: 5a2cab96c43727042bf8aa9668379ffb, type: 3}
+    - Key: 1
       Value:
-        _serializedList: []
+        _serializedList:
+        - Key: 0
+          Value:
+          - {fileID: 0}
+    - Key: 3
+      Value:
+        _serializedList:
+        - Key: 0
+          Value:
+          - {fileID: 0}
     - Key: 5
       Value:
-        _serializedList: []
+        _serializedList:
+        - Key: 0
+          Value:
+          - {fileID: 0}
     - Key: 6
       Value:
-        _serializedList: []
+        _serializedList:
+        - Key: 0
+          Value:
+          - {fileID: 0}
   miningBuildingHexSprites:
     _serializedList:
     - Key: 2

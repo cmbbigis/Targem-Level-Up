@@ -108,9 +108,30 @@ namespace Map
                     var (terrain, z) = DetermineTerrainByNoise(noise);
                     ResourceType? resource = null;
                     if (terrain == TerrainType.Forest)
-                        resource = ResourceType.Wood;
+                    {
+                        var random = Random.Range(0, 3);
+                        resource = random == 0 ? ResourceType.Food : ResourceType.Wood;
+                    }
                     else if (terrain == TerrainType.Plains)
+                    {
                         resource = ResourceType.Food;
+                    }
+                    // else if (terrain == TerrainType.Desert)
+                    // {
+                    //     var random = Random.Range(0, 5);
+                    //     if (random == 5)
+                    //     {
+                    //         resource = ResourceType.Food;
+                    //     }
+                    //     else if (random == 4)
+                    //     {
+                    //         resource = ResourceType.Wood;
+                    //     }
+                    //     else
+                    //     {
+                    //         resource = ResourceType.Clay;
+                    //     }
+                    // }
                     var hexData = new HexData(x, y, terrain, z);
                     if (resource != null)
                     {
