@@ -55,7 +55,7 @@ namespace UI
                 cityPanel = GameObject.Find("CityPanel");
 
                 unitMenus = new[] {unitMoveMenu, unitAttackMenu, unitBuildMenu};
-            // CloseAllPanels();
+            CloseAllPanels();
         }
 
         private void CloseAllPanels()
@@ -71,11 +71,23 @@ namespace UI
                 m.SetActive(false);
         }
 
+        private void OpenUnitMoveMenu()
+        {
+            unitMoveMenu.SetActive(true);
+        }
+        
+        private void OpenUnitBuildMenu()
+        {
+            unitBuildMenu.SetActive(true);
+        }
+
         private void OpenUnitAttackMenu()
         {
+            unitAttackMenu.SetActive(true);
+            
             unitAttackDropdown.ClearOptions();
             unitAttackDropdown.AddOptions(currentUnit.Attacks.Select(x => new TMP_Dropdown.OptionData(x.Type.ToString())).ToList());
-            unitActionDropdown.value = currentUnit.Attacks.IndexOf(currentUnit.CurrentAttack);
+            unitAttackDropdown.SetValueWithoutNotify(currentUnit.Attacks.IndexOf(currentUnit.CurrentAttack));
         }
 
         private void OpenUnitActionMenu()
@@ -84,18 +96,29 @@ namespace UI
             
             unitActionDropdown.ClearOptions();
             unitActionDropdown.AddOptions(EnumExtensions.GetValues<UnitActionType>().Select(x => new TMP_Dropdown.OptionData(x.ToString())).ToList());
-            unitActionDropdown.value = (int) currentUnit.CurrentActionType;
+            unitActionDropdown.SetValueWithoutNotify((int) currentUnit.CurrentActionType);
             
             CloseAllUnitMenus();
-            unitMenus[(int) currentUnit.CurrentActionType].SetActive(true);
 
-            if (currentUnit.CurrentActionType == UnitActionType.Attacking)
-                OpenUnitAttackMenu();
+            switch (currentUnit.CurrentActionType)
+            {
+                case UnitActionType.Attacking:
+                    OpenUnitAttackMenu();
+                    break;
+                case UnitActionType.Moving:
+                    OpenUnitMoveMenu();
+                    break;
+                case UnitActionType.Building:
+                    OpenUnitBuildMenu();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
-        
+
         public void OpenUnitMenu(IUnitData unit)
         {
-            // currentUnit = unit;
+            currentUnit = unit;
             
             CloseAllPanels();
             unitPanel.SetActive(true);
@@ -107,7 +130,7 @@ namespace UI
                              $"BuildingPower: {unit.BuildingPower}");
             
             CloseAllUnitMenus();
-            // OpenUnitActionMenu();
+            OpenUnitActionMenu();
         }
 
         public void OpenPlayerMenu(Player player)
@@ -116,13 +139,13 @@ namespace UI
             var currEntity = player.TurnState.GetCurrent();
             if (currEntity is IUnitData unit)
             {
-                // OpenUnitMenu(unit);
+                OpenUnitMenu(unit);
             }
         }
 
         public void HandleUnitChosen(IUnitData unit)
         {
-            // OpenUnitMenu(unit);
+            OpenUnitMenu(unit);
         }
         
         public void HandleEndButtonClicked()
@@ -132,12 +155,14 @@ namespace UI
 
         public void HandleAttackDropdownClicked(TMP_Dropdown change)
         {
-            // gameManager.HandleAttackDropdownClicked(change.value);
+            gameManager.HandleAttackDropdownClicked(change.value);
+            OpenUnitAttackMenu();
         }
 
         public void HandleActionDropdownClicked(TMP_Dropdown change)
         {
-            // gameManager.HandleActionDropdownClicked(change.value);
+            gameManager.HandleActionDropdownClicked(change.value);
+            OpenUnitActionMenu();
         }
     }
 }

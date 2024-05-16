@@ -372,7 +372,7 @@ namespace Map
         public IEnumerable<IEntity> FindPossibleAttackTargets(IUnitData unit, Attack attack)
         {
             return GetHexesWithinDistance(unit.Hex, attack.Range)
-                   .Where(x => x.Unit != null || x.City != null || x.Resource.Level > 0)
+                   .Where(x => x.Unit != null || x.City != null || x.Resource != null && x.Resource.Level > 0)
                    .Select(x => x.Unit != null
                                ? (IEntity) x.Unit
                                : x.City != null

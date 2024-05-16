@@ -158,11 +158,28 @@ namespace Core
         public void HandleActionDropdownClicked(int idx)
         {
             var unit = (IUnitData) CurrentPlayer.TurnState.GetCurrent();
-            if (unit != null)
-                unit.CurrentActionType = Enum.GetValues(typeof(UnitActionType)).Cast<UnitActionType>().ToArray()[idx];
+            if (unit == null)
+                return;
+            unit.CurrentActionType = Enum.GetValues(typeof(UnitActionType)).Cast<UnitActionType>().ToArray()[idx];
+            
+            CurrentPlayer.TurnState.ClearHighlightedEntity();
+            switch (unit.CurrentActionType)
+            {
+                case UnitActionType.Moving:
+                    ShowUnitPaths(unit);
+                    break;
+                case UnitActionType.Attacking:
+                    ShowUnitTargets(unit, unit.CurrentAttack);
+                    break;
+                case UnitActionType.Building:
+                    Debug.Log("building");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
         
-        public void HandleUnitClicked(IUnitData unit, GameObject obj)
+        public void HandleUnitClicked(IUnitData unit)
         {
             if (CurrentPlayer.TurnState.ChosenEntities.Contains(unit))
             {

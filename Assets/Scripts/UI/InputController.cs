@@ -55,9 +55,9 @@ namespace UI
             manager.onUnitClicked.RemoveListener(HandleUnitClicked);
         }
 
-        private void HandleUnitClicked(IUnitData unit, GameObject obj)
+        private void HandleUnitClicked(IUnitData unit)
         {
-            _gameManager.HandleUnitClicked(unit, obj);
+            _gameManager.HandleUnitClicked(unit);
         }
 
         private void HandleHexClicked(IHexData hex)
