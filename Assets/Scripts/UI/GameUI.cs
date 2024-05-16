@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cities.Models.City;
-using Common;
 using Core;
 using JetBrains.Annotations;
 using Map.Models.Hex;
@@ -32,6 +31,9 @@ namespace UI
                     private GameObject unitBuildMenu;
                         private Button unitBuildButton;
                         private TMP_Text unitBuildData;
+            private GameObject hexPanel;
+                private Image hexSprite;
+                private TMP_Text hexData;
             private GameObject resourcePanel;
                 private Image resourceSprite;
                 private TMP_Text resourceData;
@@ -66,6 +68,9 @@ namespace UI
                         unitBuildMenu = GameObject.Find("UnitBuildMenu");
                             unitBuildButton = GameObject.Find("UnitBuildButton").GetComponent<Button>();
                             unitBuildData = GameObject.Find("UnitBuildData").GetComponent<TMP_Text>();
+                hexPanel = GameObject.Find("HexPanel");
+                    hexSprite = GameObject.Find("HexSprite").GetComponent<Image>();
+                    hexData = GameObject.Find("HexData").GetComponent<TMP_Text>();
                 resourcePanel = GameObject.Find("ResourcePanel");
                     resourceSprite = GameObject.Find("ResourceSprite").GetComponent<Image>();
                     resourceData = GameObject.Find("ResourceData").GetComponent<TMP_Text>();
@@ -85,6 +90,8 @@ namespace UI
         
         [CanBeNull]
         private IUnitData CurrentUnit => CurrentEntity as IUnitData;
+        [CanBeNull]
+        private IHexData CurrentHex => CurrentEntity as IHexData;
 
         public void UnitBuild()
         {
@@ -101,17 +108,23 @@ namespace UI
                 currentEntity = currentPlayer.TurnState.GetCurrent();
                 if (currentEntity is IUnitData)
                     OpenUnitMenu();
-                else if (currentEntity is IResourceData)
-                    Debug.Log("open resource menu");
-                else if (currentEntity is ICityData)
-                    Debug.Log("open city menu");
-                else if (currentEntity is IHexData)
-                    Debug.Log("open hex menu");
-                return;
+                else if (currentEntity is IHexData hex)
+                {
+                    if (hex.Resource != null)
+                        OpenResourceMenu();
+                    else if (hex.City != null)
+                        OpenCityMenu();
+                    else
+                        OpenHexMenu();
+                }
+                else
+                {
+                    
+                }
             }
 
             if (currentEntity == null)
-                CloseAllPanels();
+                OpenPlayerMenu();
             else if (currentEntity is IUnitData unit)
             {
                 unitSprite.sprite = unit.Sprite;
@@ -122,14 +135,20 @@ namespace UI
                                  $"BuildingPower: {unit.BuildingPower}");
                 unitBuildButton.interactable = unit.CanBuild();
                 if (unit.Hex.Resource != null)
-                    unitBuildData.text = $"Level: {Math.Floor(unit.Hex.Resource.Level)}\nProgress: {string.Format("{0:N0}%", (unit.Hex.Resource.Level - Math.Floor(unit.Hex.Resource.Level)) * 100)}";
+                    unitBuildData.SetText($"Level: {unit.Hex.Resource.IntLevel}\n" +
+                                          $"Progress: {(unit.Hex.Resource.Level - unit.Hex.Resource.IntLevel) * 100:N0}%");
             }
-            else if (currentEntity is IResourceData)
-                Debug.Log("open resource menu");
-            else if (currentEntity is ICityData)
-                Debug.Log("open city menu");
-            // else if (currentEntity is IHexData)
-                // Debug.Log("open hex menu");
+            else if (currentEntity is IHexData hex)
+            {
+                if (hex.Resource != null)
+                {
+                    var resource = hex.Resource;
+                }
+                else if (hex.City != null)
+                {
+                    var city = hex.City;
+                }
+            }
         }
 
         private void CloseAllPanels()
@@ -137,6 +156,8 @@ namespace UI
             unitPanel.SetActive(false);
             resourcePanel.SetActive(false);
             cityPanel.SetActive(false);
+            hexPanel.SetActive(false);
+            playerPanel.SetActive(false);
         }
 
         private void CloseAllUnitMenus()
@@ -227,12 +248,85 @@ namespace UI
             OpenUnitActionMenu();
         }
 
-        public void OpenHexMenu()
+        private void OpenResourceMenu()
         {
-            
+            var hex = CurrentHex;
+            if (hex == null || hex.Resource == null)
+                return;
+            var resource = hex.Resource;
+
+            resourcePanel.SetActive(true);
+            resourceSprite.sprite = hex.Sprite;
+            resourceData.SetText($"Level: {resource.IntLevel}\n" +
+                                 $"Quantity: {resource.Quantity}\n" +
+                                 $"Owner: {resource.Master}\n");
         }
 
-        public void OpenPlayerMenu(Player player)
+        private string FormatResources(Dictionary<ResourceType, float> resources)
+        {
+            return $"Resources:\n" +
+                   $"Wood {resources[ResourceType.Wood]} " +
+                   $"Rock {resources[ResourceType.Rock]} " +
+                   $"Gold {resources[ResourceType.Gold]} " +
+                   $"Food {resources[ResourceType.Food]} " +
+                   $"Clay {resources[ResourceType.Clay]}";
+        }
+        
+        private string FormatResourcesDelta(Dictionary<ResourceType, float> resources)
+        {
+            return $"ResourcesDelta:\n" +
+                   $"Wood {resources[ResourceType.Wood]} " +
+                   $"Rock {resources[ResourceType.Rock]} " +
+                   $"Gold {resources[ResourceType.Gold]} " +
+                   $"Food {resources[ResourceType.Food]} " +
+                   $"Clay {resources[ResourceType.Clay]}";
+        }
+        
+        private void OpenCityMenu()
+        {
+            var hex = CurrentHex;
+            if (hex == null || hex.City == null)
+                return;
+            var city = hex.City;
+
+            cityPanel.SetActive(true);
+            citySprite.sprite = hex.Sprite;
+            cityData.SetText($"{city.Name}\n" +
+                             $"Owner: {city.Master}\n" +
+                             $"{FormatResources(city.Resources)}\n" +
+                             $"{FormatResourcesDelta(city.GetResourcesDelta())}\n");
+        }
+        
+        
+        private void OpenHexMenu()
+        {
+            var hex = CurrentHex;
+            if (hex == null)
+                return;
+            
+            CloseAllPanels();
+            if (hex.Resource != null)
+                OpenResourceMenu();
+            else if (hex.City != null)
+                OpenCityMenu();
+            else
+            {
+                hexPanel.SetActive(true);
+                hexSprite.sprite = hex.Sprite;
+                hexData.SetText($"Biome: {hex.Terrain}");
+            }
+        }
+
+        private void OpenPlayerMenu()
+        {
+            CloseAllPanels();
+
+            playerPanel.SetActive(true);
+            playerData.SetText($"{currentPlayer.Data.Name}\n" +
+                               $"Fraction: {currentPlayer.Data.FractionData.Type.ToString()}\n");
+        }
+
+        public void OpenMenu(Player player)
         {
             currentPlayer = player;
             // var currEntity = player.TurnState.GetCurrent();

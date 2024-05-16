@@ -33,6 +33,10 @@ namespace Map.Models.Hex
         public IUnitData Unit { get; set; }
         public IResourceData Resource { get; set; }
         public IInteractiveObject InteractiveObject { get; set; }
+        public GameObject Object { get; set; }
+
+        public Sprite Sprite => Object.GetComponentsInChildren<SpriteRenderer>()[0].sprite;
+
         public IAttackable GetAttackTarget()
         {
             if (Unit != null)

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Cities.Models.Buildings;
+using Common;
 using Map.Models.Hex;
 using Players.Models.Player;
 using Resources.Models.Resource;
@@ -10,6 +11,58 @@ namespace Cities.Models.City
     {
         public string Name { get; set; }
         public List<IResourceData> ConnectedResources { get; set; }
+
+        private Dictionary<ResourceType, float> resources;
+
+        public Dictionary<ResourceType, float> Resources
+        {
+            get => resources;
+            set
+            {
+                EnrichResources(value);
+                resources = value;
+            }
+        }
+
+        private static void EnrichResources(Dictionary<ResourceType, float> reses)
+        {
+            foreach (var type in EnumExtensions.GetValues<ResourceType>())
+                reses.TryAdd(type, 0);
+        }
+        
+        private Dictionary<ResourceType, float> CreateEmptyResources()
+        {
+            var res = new Dictionary<ResourceType, float>();
+            foreach (var type in EnumExtensions.GetValues<ResourceType>())
+            {
+                res[type] = 0;
+            }
+
+            return res;
+        }
+
+        public Dictionary<ResourceType, float> GetResourcesDelta()
+        {
+            var res = CreateEmptyResources();
+            foreach (var resource in ConnectedResources)
+            {
+                res.TryAdd(resource.Type, 0);
+                res[resource.Type] += resource.Quantity;
+            }
+
+            return res;
+        }
+        
+        public void UpdateResources()
+        {
+            var delta = GetResourcesDelta();
+            foreach (var res in delta)
+            {
+                Resources.TryAdd(res.Key, 0);
+                Resources[res.Key] += res.Value;
+            }
+        }
+        
         public IHexData Hex { get; set; }
         public IPlayerData Master { get; set; }
         public float HealthPoints { get; set; }
@@ -20,7 +73,7 @@ namespace Cities.Models.City
         public CityData()
         {
             ConnectedResources = new();
-            
+            Resources = CreateEmptyResources();
         }
         
         public void Die()

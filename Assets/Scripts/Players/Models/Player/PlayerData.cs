@@ -12,7 +12,6 @@ namespace Players.Models.Player
         public FractionData FractionData { get; set; }
         public HashSet<ICityData> Cities { get; set; }
         public HashSet<IUnitData> Units { get; set; }
-        public Dictionary<ResourceType, float> Resources { get; set; }
 
         public void AddCity(ICityData city) =>
             Cities.Add(city);
@@ -22,7 +21,5 @@ namespace Players.Models.Player
             Units.Add(unit);
         public void RemoveUnit(IUnitData unit) =>
             Units.Remove(unit);
-        public void UpdateResources(ResourceType type, float amount) =>
-            Resources[type] += amount;
     }
 }

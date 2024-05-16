@@ -74,7 +74,6 @@ namespace Core
                     FractionData = GetFractionByType(gameSettingsManager.playerFractions[i]),
                     Units = new HashSet<IUnitData>(),
                     Cities = new HashSet<ICityData>(),
-                    Resources = new Dictionary<ResourceType, float>(),
                 };
                 var turnState = new PlayerTurnState();
 
@@ -86,7 +85,7 @@ namespace Core
         {
             foreach (var p in players)
             {
-                p.Data.Resources = gameSettingsManager.fractionStartResources[p.Data.FractionData.Type].ToDictionary();
+                p.Data.Cities.First().Resources = gameSettingsManager.fractionStartResources[p.Data.FractionData.Type].ToDictionary();
 
                 var unit = new Builder(p.Data);
                 p.Data.AddUnit(unit);
@@ -122,16 +121,29 @@ namespace Core
         {
             foreach (var unit in CurrentPlayerData.Units)
                 unit.StartTurn();
-            CurrentPlayer.TurnState.StartTurn();
             var current = CurrentPlayer.TurnState.GetCurrent();
             if (current != null)
             {
                 mapManager.FocusOnEntity(current);
                 if (current is IUnitData unit)
-                    ShowUnitPaths(unit);
+                {
+                    if (unit.CurrentActionType == UnitActionType.Moving)
+                        ShowUnitPaths(unit);
+                    else if (unit.CurrentActionType == UnitActionType.Attacking)
+                        ShowUnitTargets(unit, unit.CurrentAttack);
+                }
+                else if (current is IHexData hex)
+                {
+                    if (hex.Resource != null && hex.Resource.IntLevel > 0)
+                    {
+                        var resource = hex.Resource;
+                        ShowResourcePaths(resource);
+                    }
+                }
             }
+            CurrentPlayer.TurnState.StartTurn();
 
-            gameUI.OpenPlayerMenu(CurrentPlayer);
+            gameUI.OpenMenu(CurrentPlayer);
             if (CurrentPlayer.TurnState.ChosenEntities.Count == 0)
             {
                 mapManager.FocusOnHex(CurrentPlayerData.Cities.First().Hex);
@@ -286,19 +298,30 @@ namespace Core
                                     var connectedCity = resource.ConnectedCity;
                                     if (connectedCity == hexCity)
                                     {
-                                        resource.DisconnectCity();
-                                        CurrentPlayer.TurnState.ClearHighlightedEntity();
+                                        if (resource.Master == null || resource.Master == CurrentPlayerData)
+                                        {
+                                            resource.DisconnectCity();
+                                            CurrentPlayer.TurnState.ClearHighlightedEntity();
+                                        }
                                     }
                                     else
                                     {
-                                        resource.ConnectCity(hexCity);
-                                        CurrentPlayer.TurnState.ClearHighlightedEntity();
+                                        if (resource.Master == null || resource.Master == CurrentPlayerData 
+                                            && mapManager.FindResourcePaths(curHex, new List<IHexData>{hex})[hex] != null)
+                                        {
+                                            resource.ConnectCity(hexCity);
+                                            CurrentPlayer.TurnState.ClearHighlightedEntity();
+                                        }
                                     }
                                 }
                                 else
                                 {
-                                    resource.ConnectCity(hex.City);
-                                    CurrentPlayer.TurnState.ClearHighlightedEntity();
+                                    if (resource.Master == null || resource.Master == CurrentPlayerData 
+                                        && mapManager.FindResourcePaths(curHex, new List<IHexData>{hex})[hex] != null)
+                                    {
+                                        resource.ConnectCity(hex.City);
+                                        CurrentPlayer.TurnState.ClearHighlightedEntity();
+                                    }
                                 }
                             }
                             else

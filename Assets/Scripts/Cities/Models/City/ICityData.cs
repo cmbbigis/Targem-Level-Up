@@ -9,6 +9,9 @@ namespace Cities.Models.City
     {
         string Name { get; set; }
         List<IResourceData> ConnectedResources { get; set; }
+        Dictionary<ResourceType, float> Resources { get; set; } // Ресурсы, которыми владеет игрок
+        Dictionary<ResourceType, float> GetResourcesDelta(); // Метод для обновления количества ресурсов
+        void UpdateResources(); // Метод для обновления количества ресурсов
         int ConstructionSlots { get; set; }
         void AddBuilding(IBuilding building);
         void RemoveBuilding(IBuilding building);

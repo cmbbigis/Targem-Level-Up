@@ -4,6 +4,7 @@ using Map.Models.Hex;
 using Map.Models.Terrain;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 namespace UI.Map.Hex
 {
@@ -57,6 +58,7 @@ namespace UI.Map.Hex
         {
             _data = data;
             _obj = obj;
+            _data.Object = obj;
             _settingsManager = settingsManager;
 
             var sprites = _obj.GetComponentsInChildren<SpriteRenderer>();
@@ -74,7 +76,10 @@ namespace UI.Map.Hex
 
         private void OnMouseUpAsButton()
         {
-            onHexClicked.Invoke(_data);
+            if (!EventSystem.current.IsPointerOverGameObject())
+            {
+                onHexClicked.Invoke(_data);
+            }
         }
         
         private void Update()

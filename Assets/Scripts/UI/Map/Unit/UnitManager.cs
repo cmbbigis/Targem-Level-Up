@@ -7,6 +7,7 @@ using UI.Map.Hex;
 using Units.Models.Unit;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 namespace UI.Map.Unit
 {
@@ -48,7 +49,10 @@ namespace UI.Map.Unit
 
         private void OnMouseUpAsButton()
         {
-            onUnitClicked.Invoke(_data);
+            if (!EventSystem.current.IsPointerOverGameObject())
+            {
+                onUnitClicked.Invoke(_data);
+            }
         }
 
         private void Update()
