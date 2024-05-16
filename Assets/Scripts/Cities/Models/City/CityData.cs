@@ -1,12 +1,14 @@
 ﻿using System.Collections.Generic;
 using Cities.Models.Buildings;
 using Map.Models.Hex;
+using Resources.Models.Resource;
 
 namespace Cities.Models.City
 {
     public class CityData: ICityData
     {
         public string Name { get; set; }
+        public List<IResourceData> ConnectedResources { get; set; }
         public IHexData Hex { get; set; }
         public float HealthPoints { get; set; }
         public float Defense { get; set; }

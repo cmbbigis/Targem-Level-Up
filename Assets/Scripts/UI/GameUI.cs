@@ -116,8 +116,8 @@ namespace UI
                 Debug.Log("open resource menu");
             else if (currentEntity is ICityData)
                 Debug.Log("open city menu");
-            else if (currentEntity is IHexData)
-                Debug.Log("open hex menu");
+            // else if (currentEntity is IHexData)
+                // Debug.Log("open hex menu");
         }
 
         private void CloseAllPanels()
