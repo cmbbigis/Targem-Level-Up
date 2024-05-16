@@ -6,7 +6,7 @@ namespace Resources.Models.Resource
     {
         public ResourceType Type { get; set; }
         public int Quantity { get; set; }
-        public int Level { get; set; }
+        public float Level { get; set; }
 
         public void Harvest()
         {

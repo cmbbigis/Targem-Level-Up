@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cities.Models.City;
+using Common;
 using Core;
 using JetBrains.Annotations;
 using Map.Models.Hex;
@@ -87,10 +88,14 @@ namespace Map
         public IHexData SetHexagonAt(Vector2 cords, IHexData hex) => _hexes[cords] = hex;
         public IHexData SetHexagonAt(int x, int y, IHexData hex) => SetHexagonAt(new Vector2(x, y), hex);
 
+
+        private Dictionary<ResourceType, int> resourceCounts;
         public void GenerateMap(IPlayerData[] players)
         {
             var seedX = Random.Range(0f, 100f);
             var seedY = Random.Range(0f, 100f);
+
+            resourceCounts = _gameSettingsManager.resourcesCount.ToDictionary();
             
             PlaceCitiesAndInitialBiomes(players);
             
@@ -103,7 +108,18 @@ namespace Map
 
                     var noise = Mathf.PerlinNoise((x + seedX) * 0.1f, (y + seedY) * 0.1f);
                     var (terrain, z) = DetermineTerrainByNoise(noise);
-                    InitHexAt(new HexData(x, y, terrain, z), new Vector2(x, y));
+                    ResourceType? resource = null;
+                    if (terrain == TerrainType.Forest)
+                        resource = ResourceType.Wood;
+                    else if (terrain == TerrainType.Plains)
+                        resource = ResourceType.Food;
+                    var hexData = new HexData(x, y, terrain, z);
+                    if (resource != null)
+                    {
+                        hexData.Resource = new ResourceData {Hex = hexData, Type = resource.Value, Level = 0};
+                        resourceCounts[resource.Value]--;
+                    }
+                    InitHexAt(hexData, new Vector2(x, y));
                 }
             }
 
@@ -112,7 +128,7 @@ namespace Map
 
         private void PlaceResources()
         {
-            var availableHexesForResources = new Dictionary<TerrainType, List<IHexData>>();
+            var availableHexesForResources = new Dictionary<ResourceType, List<IHexData>>();
 
             // Собрать все доступные гексы по типу территории
             for (var x = 0; x < Width; x++)
@@ -122,43 +138,40 @@ namespace Map
                     var hex = GetHexagonAt(x, y);
                     if (hex.Resource == null) // Убедиться, что гекс еще не занят другим ресурсом
                     {
-                        if (!availableHexesForResources.ContainsKey(hex.Terrain))
-                            availableHexesForResources[hex.Terrain] = new List<IHexData>();
-                
-                        availableHexesForResources[hex.Terrain].Add(hex);
+                        foreach (var type in _gameSettingsManager.biomeResources[hex.Terrain])
+                        {
+                            if (!availableHexesForResources.ContainsKey(type))
+                                availableHexesForResources[type] = new List<IHexData>();
+                            availableHexesForResources[type].Add(hex);
+                        }
                     }
                 }
             }
 
             // Распределить ресурсы по доступным гексам
-            foreach (var biome in _gameSettingsManager.biomeResources)
+            foreach (var resource in _gameSettingsManager.resourcesCount)
             {
-                if (availableHexesForResources.TryGetValue(biome.Key, out var hexList))
+                if (availableHexesForResources.TryGetValue(resource.Key, out var hexList))
                 {
-                    foreach (var resourceType in biome.Value)
+                    for (var i = 0; i < resourceCounts[resource.Key]; i++)
                     {
-                        var count = _gameSettingsManager.resourcesCount[resourceType];
-
-                        for (var i = 0; i < count; i++)
+                        if (hexList.Count == 0)
                         {
-                            if (hexList.Count == 0)
-                            {
-                                Debug.LogWarning($"Not enough hexes to place all resources of type {resourceType} in biome {biome.Key}");
-                                break; // Прекратить распределение ресурсов, если места не хватает
-                            }
-
-                            var hexIndex = Random.Range(0, hexList.Count);
-                            var selectedHex = hexList[hexIndex];
-                            selectedHex.Resource = new ResourceData{Type = resourceType, Hex = selectedHex}; // Создать новый объект ресурса
-                            _gridManager.ReinitHexAtCords(selectedHex.Cords);
-                            hexList.RemoveAt(hexIndex); // Удалить гекс из списка доступных, чтобы избежать повторения
+                            Debug.LogWarning($"Not enough hexes to place all resources of type {resource.Key}");
+                            break; // Прекратить распределение ресурсов, если места не хватает
                         }
+
+                        var hexIndex = Random.Range(0, hexList.Count);
+                        var selectedHex = hexList[hexIndex];
+                        selectedHex.Resource = new ResourceData{Type = resource.Key, Hex = selectedHex}; // Создать новый объект ресурса
+                        _gridManager.ReinitHexAtCords(selectedHex.Cords);
+                        hexList.RemoveAt(hexIndex); // Удалить гекс из списка доступных, чтобы избежать повторения
                     }
                 }
-                else
-                {
-                    Debug.LogWarning($"No available hexes found for biome {biome.Key}");
-                }
+                // else
+                // {
+                    // Debug.LogWarning($"No available hexes found for biome {biome.Key}");
+                // }
             }
         }
         

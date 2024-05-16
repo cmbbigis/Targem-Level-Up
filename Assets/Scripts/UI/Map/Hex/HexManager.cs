@@ -42,8 +42,8 @@ namespace UI.Map.Hex
             }
             if (_data.Resource != null)
             {
-                if (_data.Resource.Level > 0)
-                    return _settingsManager.GetMiningBuildingHexSprites(_data.Terrain, _data.Resource.Type)[_data.Resource.Level];
+                if (Math.Floor(_data.Resource.Level) > 0.0001)
+                    return _settingsManager.GetMiningBuildingHexSprites(_data.Terrain, _data.Resource.Type)[(int)Math.Floor(_data.Resource.Level) - 1];
                 return _settingsManager.GetResourceHexSprites(_data.Terrain, _data.Resource.Type)[0];
             }
 
@@ -79,10 +79,12 @@ namespace UI.Map.Hex
         
         private void Update()
         {
+            _upperSprite.sprite = GetUpper();
             if (Math.Abs((_data.IsChosen || _data.IsHighlighted ? 1 : 0) - _upperSprite.material.GetFloat(OutlineEnabled)) > 0.00001)
             {
                 _upperSprite.material.SetFloat(OutlineEnabled, _data.IsChosen || _data.IsHighlighted ? 1 : 0);
             }
+            
         }
     }
 }

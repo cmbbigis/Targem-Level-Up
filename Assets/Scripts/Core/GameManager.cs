@@ -89,7 +89,7 @@ namespace Core
             {
                 p.Data.Resources = gameSettingsManager.fractionStartResources[p.Data.FractionData.Type].ToDictionary();
                 
-                var unit = new Archer(p.Data);
+                var unit = new Builder(p.Data);
                 p.Data.AddUnit(unit);
                 mapManager.PlaceUnitRandomly(unit);
             }
