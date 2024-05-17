@@ -86,9 +86,17 @@ namespace Core
             {
                 p.Data.Cities.First().Resources = gameSettingsManager.fractionStartResources[p.Data.FractionData.Type].ToDictionary();
 
-                var unit = new Infantry(p.Data);
-                p.Data.AddUnit(unit);
-                mapManager.PlaceUnitRandomly(unit);
+                var builder = new Builder(p.Data);
+                p.Data.AddUnit(builder);
+                mapManager.PlaceUnitNearbyCity(builder);
+
+                var infantry = new Infantry(p.Data);
+                p.Data.AddUnit(infantry);
+                mapManager.PlaceUnitNearbyCity(infantry);
+
+                var archer = new Archer(p.Data);
+                p.Data.AddUnit(archer);
+                mapManager.PlaceUnitNearbyCity(archer);
             }
         }
 
@@ -149,11 +157,20 @@ namespace Core
                 CurrentPlayer.TurnState.SetChosenEntity(CurrentPlayerData.Cities.First().Hex);
             }
 
+            if (CurrentPlayerData.Cities.Count < 1)
+            {
+                foreach (var unit in CurrentPlayerData.Units.ToArray())
+                    unit.Die();
+                gameUI.Notify($"Player {CurrentPlayer.Data.Name} lost!");
+                players = players.Where(p => p != CurrentPlayer).ToArray();
+                currentPlayerIndex--;
+                EndTurn();
+            }
             foreach (var city in CurrentPlayerData.Cities)
                 city.UpdateResources();
 
-            Debug.Log($"Player {currentPlayerIndex + 1} turns");
-            gameUI.Notify($"Player {currentPlayerIndex + 1} turns!");
+            Debug.Log($"Player {CurrentPlayer.Data.Name} turns");
+            gameUI.Notify($"Player {CurrentPlayer.Data.Name} turns!");
         }
 
         private void ShowUnitPaths(IUnitData unit)
@@ -173,8 +190,10 @@ namespace Core
             }));
         }
 
-        public void HandleEndTurnClicked() =>
+        public void HandleEndTurnClicked()
+        {
             EndTurn();
+        }
 
         public void HandleAttackDropdownClicked(int idx)
         {

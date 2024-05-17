@@ -26,16 +26,16 @@ namespace Core
         {
             foreach (var e in ChosenEntities)
                 e.IsChosen = true;
-            foreach (var e in ChosenEntities)
-                e.IsChosen = true;
+            foreach (var e in HighlightedEntities)
+                e.IsHighlighted = true;
         }
         
         public void EndTurn()
         {
             foreach (var e in ChosenEntities)
                 e.IsChosen = false;
-            foreach (var e in ChosenEntities)
-                e.IsChosen = false;
+            foreach (var e in HighlightedEntities)
+                e.IsHighlighted = false;
         }
         
         [CanBeNull]

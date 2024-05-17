@@ -85,6 +85,9 @@ namespace Cities.Models.City
         public void Die()
         {
             HealthPoints = 0;
+            foreach (var resource in ConnectedResources)
+                resource.DisconnectCity();
+            Master.Cities.Remove(this);
         }
 
         public int ConstructionSlots { get; set; }

@@ -171,11 +171,13 @@ namespace Units.Models.Unit
 
         public bool CanBuild()
         {
-            return Hex.Resource != null;
+            return Math.Abs(MovementInfo.MovesLeft - MovementRange) < 0.001 && Hex.Resource != null;
         }
 
         public void Build()
         {
+            if (!CanBuild())
+                return;
             Hex.Resource.Level += BuildingPower / 10;
             MovementInfo.MovesLeft = 0;
         }

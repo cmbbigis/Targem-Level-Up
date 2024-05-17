@@ -294,12 +294,23 @@ namespace Map
         private bool InitUnitAt(IUnitData unitData, Vector2 cords)
         {
             var hex = GetHexagonAt(cords);
-            if (!unitData.CanStayOn(hex))
+            if (!unitData.CanStayOn(hex) || hex.Unit != null)
                 return false;
             PlaceUnitAt(unitData, hex);
             _gridManager.InitUnitAtCords(cords, unitData);
             return true;
         }
+
+        public void PlaceUnitNearbyCity(IUnitData unitData)
+        {
+            var cityHex = unitData.Master.Cities.First().Hex;
+            foreach (var neighbour in GetNeighbours(cityHex))
+            {
+                if (InitUnitAt(unitData, neighbour.Cords))
+                    return;
+            }
+        }
+        
         [Obsolete]
         public void PlaceUnitRandomly(IUnitData unitData)
         {
