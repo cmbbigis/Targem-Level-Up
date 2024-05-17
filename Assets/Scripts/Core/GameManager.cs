@@ -150,6 +150,9 @@ namespace Core
                 CurrentPlayer.TurnState.SetChosenEntity(CurrentPlayerData.Cities.First().Hex);
             }
 
+            foreach (var city in CurrentPlayerData.Cities)
+                city.UpdateResources();
+
             Debug.Log($"Player {currentPlayerIndex + 1} turns");
         }
 
@@ -342,10 +345,7 @@ namespace Core
                 if (hex.Resource != null && hex.Resource.IntLevel > 0)
                 {
                     var resource = hex.Resource;
-                    if (resource.ConnectedCity == null)
-                    {
-                        ShowResourcePaths(resource);
-                    }
+                    ShowResourcePaths(resource);
                 }
                 else if (hex.City != null)
                 {

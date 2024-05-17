@@ -21,7 +21,7 @@ namespace Resources.Models.Resource
             ConnectedCity = null;
         }
 
-        public int Quantity { get; set; }
+        public float Quantity { get; set; }
         public float Level { get; set; }
         public int IntLevel => (int) Math.Floor(Level);
         public void Harvest()

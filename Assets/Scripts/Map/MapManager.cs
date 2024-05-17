@@ -135,7 +135,7 @@ namespace Map
                     var hexData = new HexData(x, y, terrain, z);
                     if (resource != null)
                     {
-                        hexData.Resource = new ResourceData {Hex = hexData, Type = resource.Value, Level = 0};
+                        hexData.Resource = new ResourceData {Hex = hexData, Type = resource.Value, Quantity = _gameSettingsManager.resourceQuantities[resource.Value]};
                         resourceCounts[resource.Value]--;
                     }
                     InitHexAt(hexData, new Vector2(x, y));
@@ -182,7 +182,7 @@ namespace Map
 
                         var hexIndex = Random.Range(0, hexList.Count);
                         var selectedHex = hexList[hexIndex];
-                        selectedHex.Resource = new ResourceData{Type = resource.Key, Hex = selectedHex}; // Создать новый объект ресурса
+                        selectedHex.Resource = new ResourceData{Type = resource.Key, Hex = selectedHex, Quantity = _gameSettingsManager.resourceQuantities[resource.Key]}; // Создать новый объект ресурса
                         _gridManager.ReinitHexAtCords(selectedHex.Cords);
                         hexList.RemoveAt(hexIndex); // Удалить гекс из списка доступных, чтобы избежать повторения
                     }
@@ -253,7 +253,7 @@ namespace Map
                                 resource = ResourceType.Food;
                             var data = new HexData(nx, ny, preferredTerrain, noise);
                             if (resource != null)
-                                data.Resource = new ResourceData { Hex = data, Type = resource.Value, };
+                                data.Resource = new ResourceData { Hex = data, Type = resource.Value, Quantity = _gameSettingsManager.resourceQuantities[resource.Value] };
                             InitHexAt(data, new Vector2(nx, ny));
                         }
                     }

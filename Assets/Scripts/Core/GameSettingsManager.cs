@@ -38,6 +38,9 @@ namespace Core
         public SerializedDictionary<TerrainType, float> biomeCapacities;
         
         [SerializedDictionary]
+        public SerializedDictionary<ResourceType, float> resourceQuantities;
+        
+        [SerializedDictionary]
         public SerializedDictionary<ResourceType, int> resourcesCount;
     }
 }
