@@ -2,9 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using Units.Models.Unit;
-using Unity.VisualScripting;
-using UnityEditor.UI;
-using UnityEngine;
 
 namespace Core
 {

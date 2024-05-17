@@ -68,7 +68,7 @@ namespace UI.Map.Unit
                 _character.material.SetFloat(OutlineEnabled, _data.IsChosen || _data.IsHighlighted ? 1 : 0);
             }
 
-            _textData.SetText($"{_data.UnitType}\n{_data.HealthPoints}/{_data.StartHealthPoints}");
+            _textData.SetText($"{_data.UnitType}\n{_data.HealthPoints:N0}/{_data.StartHealthPoints}");
         }
     }
 }
