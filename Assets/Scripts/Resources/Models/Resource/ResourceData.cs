@@ -38,15 +38,26 @@ namespace Resources.Models.Resource
         public bool IsHighlighted { get; set; }
         public IHexData Hex { get; set; }
         public IPlayerData Master { get; set; }
+        public float StartHealthPoints { get; set; }
         public float HealthPoints { get; set; }
         public float Defense { get; set; }
 
+        public ResourceData(float healthPoints, float defense)
+        {
+            StartHealthPoints = healthPoints;
+            HealthPoints = healthPoints;
+            Defense = defense;
+        }
+
         public float GetDefensiveAbilitiesModifier()
             => 1;
+        
+        public bool IsAlive => HealthPoints > 0.001;
 
         public void Die()
         {
-            throw new System.NotImplementedException();
+            HealthPoints = 0;
+            Level = 0;
         }
     }
 }

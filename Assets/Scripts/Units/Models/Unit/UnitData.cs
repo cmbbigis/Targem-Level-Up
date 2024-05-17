@@ -93,17 +93,8 @@ namespace Units.Models.Unit
         public bool IsAlive => HealthPoints > 0.001;
         public bool CanAttack(Attack attack, IAttackable target)
         {
-            // if (target is IResourceData resourceData)
-                // Debug.Log(resourceData.Type);
-            // else if (target is ICityData cityData)
-                // Debug.Log(cityData.Name);
-            // else
-            // {
-                // Debug.Log(target);
-            // }
-                
             var distance = Vector3.Distance(Hex.Cords, target.Hex.Cords);
-            return CurrentActionType == UnitActionType.Attacking && target != this && target.Master != Master &&  MovementInfo.MovesLeft >= attack.Volume && distance <= attack.Range;
+            return CurrentActionType == UnitActionType.Attacking && target != this && target.Master != Master &&  MovementInfo.MovesLeft >= attack.Volume && distance - attack.Range < 0.5;
         }
         public bool Attack(Attack attack, IAttackable target)
         {

@@ -14,7 +14,6 @@ using UI;
 using Units.Models.Unit;
 using Units.Models.Unit.Units;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Core
 {
@@ -124,7 +123,7 @@ namespace Core
             var current = CurrentPlayer.TurnState.GetCurrent();
             if (current != null)
             {
-                // mapManager.FocusOnEntity(current);
+                mapManager.FocusOnEntity(current);
                 if (current is IUnitData unit)
                 {
                     if (unit.CurrentActionType == UnitActionType.Moving)
@@ -146,7 +145,7 @@ namespace Core
             gameUI.OpenMenu(CurrentPlayer);
             if (CurrentPlayer.TurnState.ChosenEntities.Count == 0)
             {
-                // mapManager.FocusOnHex(CurrentPlayerData.Cities.First().Hex);
+                mapManager.FocusOnHex(CurrentPlayerData.Cities.First().Hex);
                 CurrentPlayer.TurnState.SetChosenEntity(CurrentPlayerData.Cities.First().Hex);
             }
 
@@ -154,6 +153,7 @@ namespace Core
                 city.UpdateResources();
 
             Debug.Log($"Player {currentPlayerIndex + 1} turns");
+            gameUI.Notify($"Player {currentPlayerIndex + 1} turns!");
         }
 
         private void ShowUnitPaths(IUnitData unit)
@@ -163,7 +163,14 @@ namespace Core
 
         private void ShowUnitTargets(IUnitData unit, Attack attack)
         {
-            CurrentPlayer.TurnState.SetHighlightedEntities(mapManager.FindPossibleAttackTargets(unit, attack));
+            CurrentPlayer.TurnState.SetHighlightedEntities(mapManager.FindPossibleAttackTargets(unit, attack).Select(x =>
+            {
+                if (x is IResourceData resource)
+                    return (IEntity) resource.Hex;
+                if (x is ICityData city)
+                    return city.Hex;
+                return x;
+            }));
         }
 
         public void HandleEndTurnClicked() =>
@@ -193,7 +200,6 @@ namespace Core
                     ShowUnitTargets(unit, unit.CurrentAttack);
                     break;
                 case UnitActionType.Building:
-                    Debug.Log("building");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -207,20 +213,21 @@ namespace Core
                 Debug.Log("Tried to choose not your unit");
                 return;
             }
+            UnchooseEntity(CurrentPlayer.TurnState.GetCurrent());
             CurrentPlayer.TurnState.ClearHighlightedEntity();
             CurrentPlayer.TurnState.SetChosenEntity(unit);
             if (unit.CurrentActionType == UnitActionType.Moving)
                 ShowUnitPaths(unit);
             else if (unit.CurrentActionType == UnitActionType.Attacking)
                 ShowUnitTargets(unit, unit.CurrentAttack);
-            // else
-                // Debug.Log("building");
             gameUI.HandleUnitChosen(unit);
         }
 
-        private void UnchooseUnit(IUnitData unit)
+        private void UnchooseEntity(IEntity entity)
         {
-            CurrentPlayer.TurnState.PopChosenEntity(unit);
+            if (entity == null)
+                return;
+            CurrentPlayer.TurnState.PopChosenEntity(entity);
             CurrentPlayer.TurnState.ClearHighlightedEntity();
         }
 
@@ -232,11 +239,11 @@ namespace Core
                 if (current is IUnitData curUnit)
                 {
                     if (unit == curUnit)
-                        UnchooseUnit(unit);
+                        UnchooseEntity(unit);
                     else if (CurrentPlayerData.Units.Contains(curUnit))
                     {
                         if (curUnit.CanAttack(curUnit.CurrentAttack, unit))
-                            curUnit.Attack(curUnit.CurrentAttack, unit);
+                            UnitAttack(curUnit, unit);
                     }
                     else
                         ChooseUnit(unit);
@@ -252,17 +259,18 @@ namespace Core
 
         private void ChooseHex(IHexData hex)
         {
+            UnchooseEntity(CurrentPlayer.TurnState.GetCurrent());
             CurrentPlayer.TurnState.SetChosenEntity(hex);
             mapManager.FocusOnHex(hex);
             gameUI.HandleHexChosen(hex);
         }
 
-        private void UnchooseHex(IHexData hex)
+        private void UnitAttack(IUnitData unit, IAttackable target)
         {
-            CurrentPlayer.TurnState.PopChosenEntity(hex);
-            CurrentPlayer.TurnState.ClearHighlightedEntity();
+            unit.Attack(unit.CurrentAttack, target);
+            ShowUnitTargets(unit, unit.CurrentAttack);
         }
-        
+
         public void HandleHexClicked(IHexData hex)
         {
             if (CurrentPlayer.TurnState.GetCurrent() != null)
@@ -272,11 +280,31 @@ namespace Core
                 {
                     if (CurrentPlayerData.Units.Contains(unit))
                     {
-                        var (canMoveTo, path) = mapManager.CanMoveUnitTo(unit, hex);
-                        if (canMoveTo)
+                        if (unit.CurrentActionType == UnitActionType.Moving)
                         {
-                            if (mapManager.MoveUnitTo(unit, hex))
-                                ShowUnitPaths(unit);
+                            var (canMoveTo, path) = mapManager.CanMoveUnitTo(unit, hex);
+                            if (canMoveTo)
+                            {
+                                if (mapManager.MoveUnitTo(unit, hex))
+                                    ShowUnitPaths(unit);
+                            }
+                            else
+                                ChooseHex(hex);
+                        }
+                        else if (unit.CurrentActionType == UnitActionType.Attacking)
+                        {
+                            if (hex.Resource != null && hex.Resource.IntLevel > 0 && hex.Resource.Master != null && hex.Resource.Master != unit.Master)
+                            {
+                                if (unit.CanAttack(unit.CurrentAttack, hex.Resource))
+                                    UnitAttack(unit, hex.Resource);
+                            }
+                            else if (hex.City != null)
+                            {
+                                if (unit.CanAttack(unit.CurrentAttack, hex.City))
+                                    UnitAttack(unit, hex.City);
+                            }
+                            else
+                                ChooseHex(hex);
                         }
                         else
                             ChooseHex(hex);
@@ -287,7 +315,7 @@ namespace Core
                 else if (current is IHexData curHex)
                 {
                     if (hex == curHex)
-                        UnchooseHex(hex);
+                        UnchooseEntity(hex);
                     else if (curHex.Resource != null)
                     {
                         var resource = curHex.Resource;
@@ -357,10 +385,6 @@ namespace Core
         private void ShowResourcePaths(IResourceData resource)
         {
             var paths = mapManager.FindResourcePaths(resource.Hex, CurrentPlayerData.Cities.Select(x => x.Hex).ToList());
-            foreach (var p in paths)
-            {
-                Debug.Log(p.Value);
-            }
             var hexes = new HashSet<IHexData>();
             foreach (var hxs in paths.Values.Where(x => x != null).Select(x => x.Hexes))
             {

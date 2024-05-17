@@ -16,7 +16,7 @@ namespace Units.Models.Unit.Units
                 {
                     new() {Power = 20, Type = AttackType.Melee, Range = 1, Volume = 1},
                 }, 
-                3,
+                10,
                 new HashSet<TerrainType> {TerrainType.Desert, TerrainType.Dirt, TerrainType.Forest, TerrainType.Mountain, TerrainType.Plains, TerrainType.Snow, TerrainType.Swamp},
                 0
                 )

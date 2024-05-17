@@ -15,6 +15,9 @@ namespace UI
 {
     public class GameUI : MonoBehaviour
     {
+        private static int notifyFlag = Animator.StringToHash("NotifyFlg");
+        
+        private GameObject notification;
         private GameObject UI;
 
         private Button endTurnButton;
@@ -50,10 +53,11 @@ namespace UI
         [SerializeField] public GameObject gameManagerObject;
         private GameManager gameManager;
 
-        void Start()
+        void Awake()
         {
-            gameManager = gameManagerObject.GetComponent<GameManager>();
-
+            notification = GameObject.Find("Notification");
+            notification.GetComponent<TMP_Text>().SetText("");
+            
             UI = GameObject.Find("UI");
             menuPanel = GameObject.Find("MenuPanel");
                 endTurnButton = GameObject.Find("EndTurnButton").GetComponent<Button>();
@@ -83,6 +87,11 @@ namespace UI
                 unitMenus = new[] {unitMoveMenu, unitAttackMenu, unitBuildMenu};
                 
             CloseAllPanels();
+        }
+
+        private void Start()
+        {
+            gameManager = gameManagerObject.GetComponent<GameManager>();
         }
 
         private IEntity currentEntity;
@@ -159,6 +168,12 @@ namespace UI
                     hexData.SetText($"Biome: {hex.Terrain}");
                 }
             }
+        }
+
+        public void Notify(string text)
+        {
+            notification.GetComponent<TMP_Text>().SetText(text);
+            notification.GetComponent<Animator>().SetBool(notifyFlag, true);
         }
 
         private void CloseAllPanels()

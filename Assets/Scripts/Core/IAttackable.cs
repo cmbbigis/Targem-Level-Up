@@ -7,9 +7,11 @@ namespace Core
     {
         IHexData Hex { get; set; }
         IPlayerData Master { get; set; }
+        float StartHealthPoints { get; set; }
         float HealthPoints { get; set; }
         float Defense { get; set; }
         float GetDefensiveAbilitiesModifier();
+        bool IsAlive { get; }
         void Die();
     }
 }

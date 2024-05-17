@@ -65,20 +65,26 @@ namespace Cities.Models.City
         
         public IHexData Hex { get; set; }
         public IPlayerData Master { get; set; }
+        public float StartHealthPoints { get; set; }
         public float HealthPoints { get; set; }
         public float Defense { get; set; }
         public float GetDefensiveAbilitiesModifier()
             => 1;
 
-        public CityData()
+        public bool IsAlive => HealthPoints > 0.001;
+
+        public CityData(float healthPoints, float defense)
         {
             ConnectedResources = new();
             Resources = CreateEmptyResources();
+            StartHealthPoints = healthPoints;
+            HealthPoints = healthPoints;
+            Defense = defense;
         }
         
         public void Die()
         {
-            throw new System.NotImplementedException();
+            HealthPoints = 0;
         }
 
         public int ConstructionSlots { get; set; }

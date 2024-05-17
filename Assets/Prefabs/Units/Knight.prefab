@@ -122,7 +122,7 @@ RectTransform:
   - {fileID: 224487913311511908}
   - {fileID: 224681609024700380}
   - {fileID: 1301569133477659534}
-  - {fileID: 5576686703584419595}
+  - {fileID: 3038705353279849473}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -377,7 +377,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!1001 &7756085553357868745
+--- !u!1001 &931365369664673219
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -465,10 +465,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5690489646819549278, guid: 9a0107672bbe69744aa29c8b7b83a6ee, type: 3}
-      propertyPath: m_PresetInfoIsWorld
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 6158160210265488936, guid: 9a0107672bbe69744aa29c8b7b83a6ee, type: 3}
       propertyPath: m_Name
       value: TextData
@@ -478,8 +474,8 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9a0107672bbe69744aa29c8b7b83a6ee, type: 3}
---- !u!224 &5576686703584419595 stripped
+--- !u!224 &3038705353279849473 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2794335913069793730, guid: 9a0107672bbe69744aa29c8b7b83a6ee, type: 3}
-  m_PrefabInstance: {fileID: 7756085553357868745}
+  m_PrefabInstance: {fileID: 931365369664673219}
   m_PrefabAsset: {fileID: 0}

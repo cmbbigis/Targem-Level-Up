@@ -35,9 +35,7 @@ namespace Units.Models.Unit
         Attack CurrentAttack { get; set; }
 
         // ATTACKING
-        float StartHealthPoints { get; set; }
         List<Attack> Attacks { get; set; }
-        bool IsAlive { get; }
         bool CanAttack(Attack attack, IAttackable target);
         bool Attack(Attack attack, IAttackable target);
         float CalculateDamage(Attack attack, IUnitData attacker, IAttackable defender);

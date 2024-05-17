@@ -1,7 +1,7 @@
 using System;
 using Core;
 using Map.Models.Hex;
-using Map.Models.Terrain;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -14,6 +14,7 @@ namespace UI.Map.Hex
         private GameObject _obj;
         private SpriteRenderer _upperSprite;
         private SpriteRenderer _lowerSprite;
+        private TMP_Text _text;
         
         public UnityEvent<IHexData> onHexClicked;
         public static event Action<HexManager> OnHexManagerCreated;
@@ -66,6 +67,8 @@ namespace UI.Map.Hex
 
             _upperSprite.sprite = GetUpper();
             _lowerSprite.sprite = GetLower();
+            
+            _text = _obj.GetComponentsInChildren<TMP_Text>()[0];
         }
 
         public void Reinit()
@@ -90,6 +93,12 @@ namespace UI.Map.Hex
                 _upperSprite.material.SetFloat(OutlineEnabled, _data.IsChosen || _data.IsHighlighted ? 1 : 0);
             }
             
+            if (_data.Resource != null && _data.Resource.IntLevel > 0)
+                _text.SetText($"{_data.Resource.Type}\n" +
+                              $"{_data.Resource.HealthPoints}/{_data.Resource.StartHealthPoints}");
+            else if (_data.City != null)
+                _text.SetText($"{_data.City.Name}\n" +
+                              $"{_data.City.HealthPoints}/{_data.City.StartHealthPoints}");
         }
     }
 }
