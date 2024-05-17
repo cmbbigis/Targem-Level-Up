@@ -106,6 +106,9 @@ namespace UI
             if (currentEntity != currentPlayer.TurnState.GetCurrent())
             {
                 currentEntity = currentPlayer.TurnState.GetCurrent();
+                CloseAllPanels();
+                if (currentEntity == null)
+                    OpenPlayerMenu();
                 if (currentEntity is IUnitData)
                     OpenUnitMenu();
                 else if (currentEntity is IHexData hex)
@@ -117,14 +120,7 @@ namespace UI
                     else
                         OpenHexMenu();
                 }
-                else
-                {
-                    
-                }
             }
-
-            if (currentEntity == null)
-                OpenPlayerMenu();
             else if (currentEntity is IUnitData unit)
             {
                 unitSprite.sprite = unit.Sprite;
@@ -143,10 +139,24 @@ namespace UI
                 if (hex.Resource != null)
                 {
                     var resource = hex.Resource;
+                    resourceSprite.sprite = hex.Sprite;
+                    resourceData.SetText($"Level: {resource.IntLevel}\n" +
+                                         $"Quantity: {resource.Quantity}\n" +
+                                         $"Owner: {resource.Master}\n");
                 }
                 else if (hex.City != null)
                 {
                     var city = hex.City;
+                    citySprite.sprite = hex.Sprite;
+                    cityData.SetText($"{city.Name}\n" +
+                                     $"Owner: {city.Master.Name}\n" +
+                                     $"{FormatResources(city.Resources)}\n" +
+                                     $"{FormatResourcesDelta(city.GetResourcesDelta())}\n");
+                }
+                else
+                {
+                    hexSprite.sprite = hex.Sprite;
+                    hexData.SetText($"Biome: {hex.Terrain}");
                 }
             }
         }
@@ -292,7 +302,7 @@ namespace UI
             cityPanel.SetActive(true);
             citySprite.sprite = hex.Sprite;
             cityData.SetText($"{city.Name}\n" +
-                             $"Owner: {city.Master}\n" +
+                             $"Owner: {city.Master.Name}\n" +
                              $"{FormatResources(city.Resources)}\n" +
                              $"{FormatResourcesDelta(city.GetResourcesDelta())}\n");
         }
